@@ -1,19 +1,23 @@
 {
     "name": "wolf-table-plus",
-    "private": true,
-    "version": "0.0.0",
+    "private": false,
+    "version": "0.0.1",
     "type": "module",
     "files": [
         "dist",
         "index.d.ts"
     ],
-    "main": "./dist/counter.umd.cjs",
-    "module": "./dist/counter.js",
+    "main": "./dist/wolf-table-plus.umd.cjs",
+    "module": "./dist/wolf-table-plus.js",
     "types": "./index.d.ts",
     "exports": {
         "types": "./index.d.ts",
-        "import": "./dist/counter.js",
-        "require": "./dist/counter.umd.cjs"
+        "import": "./dist/wolf-table-plus.js",
+        "require": "./dist/wolf-table-plus.umd.cjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/NeoLep/wolf-table-plus"
     },
     "scripts": {
         "lint": "eslint .",

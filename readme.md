@@ -2,8 +2,11 @@
 
 基于 [WolfTable](https://github.com/wolf-table/table) 进行完善的 web table 库
 
+## LICENSE
+[MIT](https://github.com/NeoLep/wolf-table-plus?tab=MIT-1-ov-file)
+
 ## Install
-PNPM / NPM xxx
+PNPM / NPM i wolf-table-plus
 
 ## Usage
 ```typescript
