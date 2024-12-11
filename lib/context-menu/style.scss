@@ -1,0 +1,126 @@
+@import '../style.base.scss';
+
+.#{$style-prefix}-context-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 220px;
+    border: $border-style;
+    background: $bg-color;
+    z-index: 9999;
+    padding: 5px 0 !important;
+    .divider {
+        position: relative;
+        height: 0;
+        margin: 0;
+        padding: 5px 0;
+        border: none;
+        &::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translate(0, -50%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    }
+    .context-item--disabled {
+        position: relative;
+        cursor: not-allowed !important;
+        .label,
+        .shortcut {
+            color: $text-color-disabled !important;
+        }
+        &:hover {
+            background-color: transparent !important;
+        }
+        &::after {
+            position: absolute;
+            content: '';
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+    }
+    .context-item-tree {
+        position: relative;
+        .label-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            .arrow {
+                width: 14px;
+                height: 14px;
+                box-sizing: border-box;
+                text-align: center;
+                user-select: none;
+                overflow: hidden;
+                position: relative;
+                display: inline-block;
+                opacity: 0.5;
+                line-height: 0;
+                cursor: pointer;
+                .icon {
+                    background-image: url('./sprite.svg');
+                    position: absolute;
+                    width: 262px;
+                    height: 444px;
+                    &.arrow-right {
+                        left: -8 * $icon-size;
+                        top: -1 * $icon-size;
+                    }
+
+                    &.chevron-right {
+                        left: -3 * $icon-size;
+                        top: -3 * $icon-size;
+                    }
+                }
+            }
+        }
+        .tree-list {
+            padding: 0 !important;
+            display: none;
+            position: absolute;
+            left: calc(100%);
+            margin-left: 2px;
+        }
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        // &:hover {
+        //   .tree-list {
+        //     display: block;
+        //   }
+        // }
+    }
+    li {
+        list-style-type: none;
+        padding: 5px 8px !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        .label {
+            color: $text-color-primary;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .shortcut {
+            color: $text-color-secondary;
+            font-size: 12px;
+        }
+        &:hover {
+            background-color: $primary-color-light-8;
+        }
+    }
+}

@@ -1,0 +1,91 @@
+import Range from './range'
+import type { Border, Area, Rect, BorderType } from '.'
+
+export function borderRanges(area: Area, [ref, type, ...borderOther]: Border, areaMerges: Range[]) {
+    // render borders
+    // console.log(area, [ref, type, ...borderOther], areaMerges)
+    const ret: [Range, Rect, BorderType][] = []
+    const bRange = Range.with(ref)
+    const intersectMerges = areaMerges.filter((it) => it.intersects(bRange))
+    if (bRange.intersects(area.range) || intersectMerges.length > 0) {
+        if (intersectMerges.length <= 0) {
+            ret.push([bRange, area.rect(bRange), type])
+        } else {
+            for (const merge of intersectMerges) {
+                if (bRange.within(merge)) {
+                    if (
+                        bRange.startRow === merge.startRow &&
+                        bRange.startCol === merge.startCol &&
+                        type !== 'inside' &&
+                        type !== 'horizontal' &&
+                        type !== 'vertical'
+                    ) {
+                        ret.push([merge, area.rect(merge), type === 'all' ? 'outside' : type])
+                    }
+                } else if (
+                    type === 'outside' ||
+                    type === 'left' ||
+                    type === 'top' ||
+                    type === 'right' ||
+                    type === 'bottom'
+                ) {
+                    ret.push([bRange, area.rect(bRange), type])
+                    break
+                } else {
+                    const imerges = intersectMerges.filter((it) => !it.equals(merge))
+                    bRange.difference(merge).forEach((it) => {
+                        if (it.intersects(area.range)) {
+                            const borderRect = area.rect(it)
+                            ret.push(
+                                ...borderRanges(
+                                    area,
+                                    [it.toString(), type, ...borderOther],
+                                    imerges,
+                                ),
+                            )
+                            if (type === 'inside' || type === 'horizontal') {
+                                if (it.startRow < merge.startRow && it.endRow < merge.startRow) {
+                                    // top
+                                    ret.push([it, borderRect, 'bottom'])
+                                } else if (
+                                    it.startRow > merge.startRow &&
+                                    it.endRow > merge.startRow
+                                ) {
+                                    // bottom
+                                    ret.push([it, borderRect, 'top'])
+                                }
+                            }
+                            if (type === 'inside' || type === 'vertical') {
+                                if (it.startCol < merge.startCol && it.endCol < merge.startCol) {
+                                    // left
+                                    ret.push([it, borderRect, 'right'])
+                                }
+                                if (it.startCol > merge.startCol && it.endCol > merge.startCol) {
+                                    // right
+                                    ret.push([it, borderRect, 'left'])
+                                }
+                            }
+                        }
+                    })
+                    if (type === 'all') {
+                        const borderRect = area.rect(merge)
+                        if (bRange.startRow === merge.startRow) {
+                            ret.push([merge, borderRect, 'top'])
+                        }
+                        if (bRange.endRow === merge.endRow) {
+                            ret.push([merge, borderRect, 'bottom'])
+                        }
+                        if (bRange.startCol === merge.startCol) {
+                            ret.push([merge, borderRect, 'left'])
+                        }
+                        if (bRange.endCol === merge.endCol) {
+                            ret.push([merge, borderRect, 'right'])
+                        }
+                    }
+                    break
+                }
+            }
+        }
+    }
+    return ret
+}

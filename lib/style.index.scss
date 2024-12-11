@@ -1,0 +1,28 @@
+@import './scrollbar/style.scss';
+@import './resizer/style.scss';
+@import './selector/style.scss';
+@import './overlayer/style.scss';
+@import './editor/style.scss';
+@import './editor/select/style.scss';
+@import './context-menu/style.scss';
+@import './head-menu/style.scss';
+
+.#{$style-prefix}-layer {
+    * {
+        font-size: 14px;
+    }
+}
+.#{$style-prefix}-container {
+    position: relative;
+    overflow: hidden;
+    * {
+        box-sizing: content-box;
+    }
+    canvas {
+        outline: none;
+    }
+
+    .secondary-text-color {
+        color: $text-color-secondary;
+    }
+}

@@ -1,0 +1,14 @@
+dist
+public
+.local
+.output.js
+node_modules
+
+**/*.svg
+**/*.sh
+
+public
+.npmrc
+
+pnpm-lock.yaml
+package.json

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                overflow: hidden;
+            }
+        </style>
+        <link rel="stylesheet" href="./dist/wolf-table-plus.css" />
+        <title>WolfTablePlus</title>
+    </head>
+
+    <body>
+        <div id="app" style="width: 100vw; height: 100vh"></div>
+        <script type="module" src="./dist/wolf-table-plus.js"></script>
+        <script>
+            setTimeout(() => {
+                const app = document.querySelector('#app')
+                wolfp
+                    .create(
+                        app,
+                        () => app.clientWidth,
+                        () => app.clientHeight,
+                        {
+                            scrollable: true,
+                            resizable: true,
+                            selectable: true,
+                            editable: true,
+                            copyable: true,
+                            data: {
+                                // cols: 30,
+                                rows: 103,
+                            },
+                        },
+                    )
+                    .render()
+                    .changeLang('zh')
+            }, 500)
+        </script>
+    </body>
+</html>
