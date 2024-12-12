@@ -122,11 +122,11 @@ export default class ContextMenu {
         {
             type: 'tree',
             id: 'insertMore',
-            label: '插入其他',
+            label: this.table._i18n.t('insert_others'),
             children: [
                 {
                     id: 'insertPicture',
-                    label: '插入图片',
+                    label: this.table._i18n.t('insert_pictures'),
                     action: async (evt, table) => {
                         try {
                             const base64 = await uploadPicture('image/*')
@@ -143,13 +143,13 @@ export default class ContextMenu {
                         // console.log('insert picture')
                     },
                 },
-                {
-                    id: 'insertChart',
-                    label: '插入图表',
-                    action: (evt, table) => {
-                        console.log('insert chart')
-                    },
-                },
+                // {
+                //     id: 'insertChart',
+                //     label: '插入图表',
+                //     action: (evt, table) => {
+                //         console.log('insert chart')
+                //     },
+                // },
             ],
         },
         {

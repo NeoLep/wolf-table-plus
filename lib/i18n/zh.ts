@@ -33,6 +33,8 @@ export default {
     deleteStyle: '清除样式',
     deleteCell: '完全删除',
     theme_color: '主题颜色',
+    insert_others: '插入其他',
+    insert_pictures: '插入图片',
     formats: {
         normal: '正常',
         text: '文本',

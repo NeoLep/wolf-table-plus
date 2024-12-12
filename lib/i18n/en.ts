@@ -33,6 +33,8 @@ export default {
   deleteStyle: 'Delete Style',
   deleteCell: 'Delete',
   theme_color: 'Theme colors',
+  insert_others: 'Insert other',
+  insert_pictures: 'Insert picture',
   formats: {
     normal: 'Normal',
     text: 'Text',
