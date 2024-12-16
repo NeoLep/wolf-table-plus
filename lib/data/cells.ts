@@ -50,8 +50,8 @@ export default class Cells {
             const rowIndexes = _indexes.get(row)
             const index = rowIndexes.get(col)
             if (index !== undefined && this._[index]) {
-                if (typeof this._[index][2] === 'object') {
-                    this._[index][2]!.value = undefined
+                if (typeof this._[index]![2] === 'object') {
+                    ;(this._[index]![2]! as CellText).value = undefined
                 } else {
                     this.remove(row, col)
                 }
@@ -191,7 +191,7 @@ export default class Cells {
     private resetFormulas() {
         this._formulas.forEach((index) => {
             if (this._[index]) {
-                const [, , cell] = this._[index]
+                const cell = this._[index]![2]
                 if (cell instanceof Object && cell.formula) {
                     cell.value = String(this._formulaParser(cell.formula))
                 }
@@ -201,7 +201,7 @@ export default class Cells {
 }
 
 export function cellValue(cell: DataCell): DataCellValue {
-    return cell instanceof Object ? cell.value : cell
+    return (cell instanceof Object ? cell.value : cell) as DataCellValue
 }
 
 export function cellValueString(cell: DataCell): string {

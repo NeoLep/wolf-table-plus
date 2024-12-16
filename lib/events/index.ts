@@ -21,7 +21,9 @@ export default class Events {
             .on('mouseup', (evt) => this.mouseUpHandler(evt as MouseEvent))
             .on('wheel.prevent', (evt) => this.wheelHandler(evt as WheelEvent))
             .on('keydown', (evt) => this.keydownHandler(evt as KeyboardEvent))
-            .on('contextmenu.prevent', (evt) => this.contextmenuHandler(evt as MouseEvent))
+            .on('contextmenu.prevent', (evt) =>
+                this.contextmenuHandler(evt as MouseEvent & { layerY: number; layerX: number }),
+            )
             .on('dblclick.prevent', () => {
                 editor.reset(this.table)
             })
@@ -336,7 +338,7 @@ export default class Events {
         evt.preventDefault()
     }
 
-    contextmenuHandler(evt: MouseEvent) {
+    contextmenuHandler(evt: MouseEvent & { layerY: number; layerX: number }) {
         this.table._contextMenu.show(evt)
         evt.preventDefault()
     }

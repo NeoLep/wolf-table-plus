@@ -12,9 +12,12 @@ function get(t: Table, cell: DataCell) {
     if (!editor) {
         const renders = Renders.use()
         if (renders.options[type] && renders.options[type].editor) {
-            const editorGenerator = renders.options[type].editor
-            _editors.set(type, editorGenerator()) // set editors
-            editor = _editors.get(type)
+            const editorGenerator = renders.options[type].editor!
+            const gen = editorGenerator()
+            if (gen) {
+                _editors.set(type, gen) // set editors
+                editor = _editors.get(type)
+            }
         }
     }
 

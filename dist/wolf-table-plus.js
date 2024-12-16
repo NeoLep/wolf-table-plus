@@ -664,7 +664,7 @@ class as {
   resetFormulas() {
     this._formulas.forEach((e) => {
       if (this._[e]) {
-        const [, , t] = this._[e];
+        const t = this._[e][2];
         t instanceof Object && t.formula && (t.value = String(this._formulaParser(t.formula)));
       }
     });
@@ -7206,8 +7206,8 @@ function nn(i, e) {
   if (!s) {
     const n = ve.use();
     if (n.options[t] && n.options[t].editor) {
-      const o = n.options[t].editor;
-      r.set(t, o()), s = r.get(t);
+      const o = n.options[t].editor, c = o();
+      c && (r.set(t, c), s = r.get(t));
     }
   }
   return i._emitter.emit("getChanger", t, e), s == null || s.changer((n) => {
@@ -7963,7 +7963,10 @@ class Wn {
   constructor(e) {
     w(this, "table");
     w(this, "setCutted", !1);
-    this.table = e, this.table._canvas.on("mousedown", (t) => this.mousedownHandler(t)).on("mousemove", (t) => this.mousemoveHandler(t)).on("mouseup", (t) => this.mouseUpHandler(t)).on("wheel.prevent", (t) => this.wheelHandler(t)).on("keydown", (t) => this.keydownHandler(t)).on("contextmenu.prevent", (t) => this.contextmenuHandler(t)).on("dblclick.prevent", () => {
+    this.table = e, this.table._canvas.on("mousedown", (t) => this.mousedownHandler(t)).on("mousemove", (t) => this.mousemoveHandler(t)).on("mouseup", (t) => this.mouseUpHandler(t)).on("wheel.prevent", (t) => this.wheelHandler(t)).on("keydown", (t) => this.keydownHandler(t)).on(
+      "contextmenu.prevent",
+      (t) => this.contextmenuHandler(t)
+    ).on("dblclick.prevent", () => {
       Me.reset(this.table);
     }), this.initSelectorShadowInput();
   }

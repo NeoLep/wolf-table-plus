@@ -1,0 +1,16 @@
+import Divider from './buttons/divider';
+import UndoButton from './buttons/undo';
+import RedoButton from './buttons/redo';
+import PaintformatButton from './buttons/paintformat';
+import ClearformatButton from './buttons/clearformat';
+import ValueFormatButton from './buttons/value-format';
+import FontFamilyButton from './buttons/fonts';
+import FontSizeButton from './buttons/font-size';
+import FastOperateButton from './buttons/fast-operate';
+import TextColor from './buttons/text-color';
+import FillColor from './buttons/fill-color';
+import Border from './buttons/border';
+import TextAlignButton from './buttons/text-align';
+import TextVerticalAlignButton from './buttons/text-vertical-align';
+import type Table from '..';
+export default function (table: Table): (Divider | UndoButton | RedoButton | PaintformatButton | ClearformatButton | ValueFormatButton | FontFamilyButton | FontSizeButton | FastOperateButton | TextColor | FillColor | Border | TextAlignButton | TextVerticalAlignButton)[];

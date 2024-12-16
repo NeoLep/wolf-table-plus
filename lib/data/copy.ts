@@ -95,7 +95,7 @@ function copyToDataCell(
                 }
             }
         } else {
-            if (n !== undefined) newCell = getCellValue(newCell, n)
+            if (n !== undefined) newCell = getCellValue(newCell as string | number, n)
         }
         to.cells.set(tr, tc, newCell)
     } else {

@@ -2,11 +2,11 @@
     "name": "wolf-table-plus",
     "private": false,
     "description": "a based-canvas table",
-    "version": "0.0.5",
+    "version": "0.0.7",
     "type": "module",
     "main": "dist/wolf-table-plus.umd.cjs",
     "module": "dist/wolf-table-plus.js",
-    "types": "./index.d.ts",
+    "types": "./dist/index.d.ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/NeoLep/wolf-table-plus"
@@ -15,7 +15,7 @@
         "lint": "eslint .",
         "prettier": "prettier --write .",
         "dev": "vite",
-        "build": "tsc && vite build"
+        "build": "vite build && tsc"
     },
     "dependencies": {
         "crypto-js": "^4.2.0",

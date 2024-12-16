@@ -195,9 +195,9 @@ export default class ContextMenu {
         },
     ]
 
-    async show(evt: MouseEvent) {
-        this._contextElement.css('top', `${evt.layerY + 5}px`)
-        this._contextElement.css('left', `${evt.layerX + 5}px`)
+    async show(evt: MouseEvent & { layerY: number; layerX: number }) {
+        this._contextElement.css('top', `${evt!.layerY + 5}px`)
+        this._contextElement.css('left', `${evt!.layerX + 5}px`)
 
         const transferStatusToPromise = (status?: StatusType): Promise<boolean> => {
             if (status === undefined) return new Promise((resolve) => resolve(false))

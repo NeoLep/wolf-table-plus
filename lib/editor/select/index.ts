@@ -16,7 +16,10 @@ export default class SelectEditor extends Editor {
 
     constructor() {
         super(`${stylePrefix}-select`)
-        this._searchInput = h('input').on('input', ({ target }) => this.query(target.value))
+        this._searchInput = h('input').on('input', (evt) => {
+            const target = (evt as InputEvent).target as HTMLInputElement
+            this.query(target.value)
+        })
         this._content = h('ul', `${stylePrefix}-select-content`)
         this._.append(
             h('div', `${stylePrefix}-select-input`).append(this._searchInput),
