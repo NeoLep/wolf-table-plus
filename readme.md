@@ -6,7 +6,7 @@
 [MIT](https://github.com/NeoLep/wolf-table-plus?tab=MIT-1-ov-file)
 
 ## Install
-PNPM / NPM i wolf-table-plus
+`pnpm / npm i wolf-table-plus`
 
 ## Usage
 ```typescript
@@ -33,6 +33,7 @@ PNPM / NPM i wolf-table-plus
 
 
 ## Development
+`pnpm dev`
 
 
 
