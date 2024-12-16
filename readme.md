@@ -11,6 +11,8 @@
 ## Usage
 ```typescript
     import WolfTablePlus from 'wolf-table-plus'
+    import 'wolf-table-plus/dist/wolf-table-plus.css'
+    
     const container = document.querySelector('#container')
     const wt = WolfTablePlus.create(
         container,

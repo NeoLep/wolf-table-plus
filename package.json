@@ -1,20 +1,12 @@
 {
     "name": "wolf-table-plus",
     "private": false,
-    "version": "0.0.3",
+    "description": "a based-canvas table",
+    "version": "0.0.5",
     "type": "module",
-    "files": [
-        "dist",
-        "index.d.ts"
-    ],
-    "main": "./dist/wolf-table-plus.umd.cjs",
-    "module": "./dist/wolf-table-plus.js",
+    "main": "dist/wolf-table-plus.umd.cjs",
+    "module": "dist/wolf-table-plus.js",
     "types": "./index.d.ts",
-    "exports": {
-        "types": "./index.d.ts",
-        "import": "./dist/wolf-table-plus.js",
-        "require": "./dist/wolf-table-plus.umd.cjs"
-    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/NeoLep/wolf-table-plus"
