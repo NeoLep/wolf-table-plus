@@ -1,0 +1,72 @@
+@import '../style.base.scss';
+
+.#{$style-prefix}-dialog-mask {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9998;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 1;
+    // pointer-events: none;  // important
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: rgba(0,0,0,.5);
+    .#{$style-prefix}-dialog.is-draggable {
+      .#{$style-prefix}-dialog__header {
+        cursor: move !important;
+      }
+    }
+  .#{$style-prefix}-dialog {
+    position: absolute;
+    padding: 16px;
+    width: 680px;
+    box-sizing: border-box;
+    background-color: $bg-color-overlay;
+    z-index: 99999;
+    box-shadow: 0 6px 32px 2px rgba(68,73,77,.16),0 0 0 1px rgba(0,0,0,.04),0 4px 6px 2px rgba(0,0,0,.04);
+    .#{$style-prefix}-dialog__header {
+      position: relative;
+      height: 20px;
+      margin-bottom: 20px;
+      padding-right: 24px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      .#{$style-prefix}-dialog__header_close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 24px;
+        height: 24px;
+        overflow: hidden;
+        cursor: pointer;
+        &:hover {
+          background-color: $bg-dark-fill-hover !important;
+        }
+        .icon {
+          background-image: url('./sprite.svg');
+          zoom: 1.4;
+          position: absolute;
+          width: 262px;
+          height: 444px;
+          left: -13 * $icon-size;
+          top: -2 * $icon-size;
+        }
+      }
+    }
+   
+  }
+}

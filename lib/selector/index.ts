@@ -1,4 +1,4 @@
-import { Range } from '../table-renderer'
+import { Range, xy2expr } from '../table-renderer'
 import { stylePrefix, borderWidth } from '../config'
 import { h } from '../element'
 import type HElement from '../element'
@@ -237,6 +237,16 @@ export default class Selector {
             it.forEach((it1) => it1.clear())
             it.length = 0
         })
+    }
+
+    getFocusExpr() {
+        if (!this.currentRange) return []
+        const { _focus, _move } = this
+        const { startRow, startCol, endRow, endCol } = this.currentRange
+        if (startRow === endRow && startCol === endCol) {
+            return [xy2expr(startCol, startRow)]
+        }
+        return [xy2expr(startCol, startRow), xy2expr(endCol, endRow)]
     }
 }
 

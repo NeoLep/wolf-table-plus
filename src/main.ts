@@ -149,8 +149,8 @@ if (container) {
             },
         },
     )
-        .render()
         .changeLang('zh')
+        .render()
 
     // 动态控制隐藏的右键菜单选项
     // wt._contextMenu.hiddenOption = ['undo', 'redo']

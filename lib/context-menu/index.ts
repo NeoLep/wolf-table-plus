@@ -3,8 +3,10 @@ import { stylePrefix } from '../config'
 import selector from '../index.selector'
 import Store from '../store'
 import { uploadPicture } from '../utils/upload-file'
+
 import type Table from '..'
 import type HElement from '../element'
+import ValidatorSelectDialog from '../validators/select'
 
 type StatusType = boolean | ((table: Table) => boolean) | ((table: Table) => Promise<boolean>)
 
@@ -38,8 +40,32 @@ export default class ContextMenu {
     hiddenOption: string[] | ((table: Table) => string[]) = []
     _extendOptions: OptionsResultType[] = []
 
+    validatorSelectDialogEvents: {
+        instance: ValidatorSelectDialog
+        show: Function
+        close: Function
+    }
+
     constructor(table: Table) {
         this.table = table
+
+        this.validatorSelectDialogEvents = {
+            instance: new ValidatorSelectDialog(this.table, {
+                onSubmitCallback(value) {
+                    console.log(value)
+                },
+            }),
+            show() {
+                let cellRange = ''
+                if (this.instance.table._selector) {
+                    cellRange = this.instance.table._selector?.getFocusExpr().join(':')
+                }
+                this.instance.show({ cellRange, options: [] })
+            },
+            close() {
+                this.instance.close()
+            },
+        }
 
         this._contextElement = h('ul', `${stylePrefix}-context-menu`)
         this._contextElement.hide()
@@ -122,7 +148,7 @@ export default class ContextMenu {
         {
             type: 'tree',
             id: 'insertMore',
-            label: this.table._i18n.t('insert_others'),
+            label: this.table._i18n.t('insert'),
             children: [
                 {
                     id: 'insertPicture',
@@ -153,6 +179,20 @@ export default class ContextMenu {
             ],
         },
         {
+            type: 'tree',
+            id: 'validators',
+            label: this.table._i18n.t('dataValidator'),
+            children: [
+                {
+                    id: 'validatorSelector',
+                    label: this.table._i18n.t('selectorOptions'),
+                    action: () => {
+                        this.validatorSelectDialogEvents.show()
+                    },
+                },
+            ],
+        },
+        {
             type: 'div',
         },
         {
@@ -170,28 +210,35 @@ export default class ContextMenu {
             },
         },
         {
-            id: 'deleteValue',
-            label: this.table._i18n.t('deleteValue'),
-            shortcut: 'Backspace',
-            action: () => {
-                this.table._events.eventTrigger('clearCell', 'value')
-            },
-        },
-        {
-            id: 'deleteStyle',
-            label: this.table._i18n.t('deleteStyle'),
-            shortcut: 'Shift + Backspace',
-            action: () => {
-                this.table._events.eventTrigger('clearCell', 'style')
-            },
-        },
-        {
-            id: 'deleteCell',
-            label: this.table._i18n.t('deleteCell'),
-            shortcut: 'Delete',
-            action: () => {
-                this.table._events.eventTrigger('clearCell', 'cell')
-            },
+            type: 'tree',
+            id: 'deleteTree',
+            label: this.table._i18n.t('delete'),
+            children: [
+                {
+                    id: 'deleteValue',
+                    label: this.table._i18n.t('deleteValue'),
+                    shortcut: 'Backspace',
+                    action: () => {
+                        this.table._events.eventTrigger('clearCell', 'value')
+                    },
+                },
+                {
+                    id: 'deleteStyle',
+                    label: this.table._i18n.t('deleteStyle'),
+                    shortcut: 'Shift + Backspace',
+                    action: () => {
+                        this.table._events.eventTrigger('clearCell', 'style')
+                    },
+                },
+                {
+                    id: 'deleteCell',
+                    label: this.table._i18n.t('deleteCell'),
+                    shortcut: 'Delete',
+                    action: () => {
+                        this.table._events.eventTrigger('clearCell', 'cell')
+                    },
+                },
+            ],
         },
     ]
 

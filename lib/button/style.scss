@@ -1,0 +1,107 @@
+.#{$style-prefix}-bse-button {
+  background: none;
+  outline: none;
+  border: none;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  padding: 8px 15px;
+  cursor: pointer;
+  &:hover {
+    background-color: $bg-dark-fill-hover;
+  }
+  .#{$style-prefix}-icon {
+    width: 18px !important;
+    height: 18px !important;
+    box-sizing: border-box !important;
+    line-height: 0 !important;
+    .icon {
+      width: 262px !important;
+      height: 444px !important;
+    }
+  }
+}
+
+.#{$style-prefix}-bse-button.is-disabled {
+  position: relative;
+  cursor: not-allowed;
+  background-image: none;
+}
+.#{$style-prefix}-bse-button.none-border {
+  border: none !important;
+}
+
+.#{$style-prefix}-bse-button--default {
+  border: 1px solid $border-color;
+}
+.#{$style-prefix}-bse-button--default.is-disabled {
+  color: $text-color-disabled;
+  &:hover {
+    background-color: $bg-color;
+  }
+}
+.#{$style-prefix}-bse-button--primary {
+  background-color: $color-primary;
+  color: $color-white;
+  &:hover {
+    background-color: $color-primary-light-3;
+  }
+}
+.#{$style-prefix}-bse-button--primary.is-disabled {
+  background-color: $color-primary-light-5 !important;
+  &:hover {
+    background-color: $color-primary-light-5 !important;
+  }
+}
+.#{$style-prefix}-bse-button--success {
+  background-color: $color-success;
+  color: $color-white;
+  &:hover {
+    background-color: $color-success-light-3;
+  }
+}
+.#{$style-prefix}-bse-button--success.is-disabled {
+  background-color: $color-success-light-5 !important;
+  &:hover {
+    background-color: $color-success-light-5 !important;
+  }
+}
+.#{$style-prefix}-bse-button--info {
+  background-color: $color-info;
+  color: $color-white;
+  &:hover {
+    background-color: $color-info-light-3;
+  }
+}
+.#{$style-prefix}-bse-button--info.is-disabled {
+  background-color: $color-info-light-5 !important;
+  &:hover {
+    background-color: $color-info-light-5 !important;
+  }
+}
+.#{$style-prefix}-bse-button--warning {
+  background-color: $color-warning;
+  color: $color-white;
+  &:hover {
+    background-color: $color-warning-light-3;
+  }
+}
+.#{$style-prefix}-bse-button--warning.is-disabled {
+  background-color: $color-warning-light-5 !important;
+  &:hover {
+    background-color: $color-warning-light-5 !important;
+  }
+}
+.#{$style-prefix}-bse-button--danger {
+  background-color: $color-danger;
+  color: $color-white;
+  &:hover {
+    background-color: $color-danger-light-3;
+  }
+}
+.#{$style-prefix}-bse-button--danger.is-disabled {
+  background-color: $color-danger-light-5 !important;
+  &:hover {
+    background-color: $color-danger-light-5 !important;
+  }
+}

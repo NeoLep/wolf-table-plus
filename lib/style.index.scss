@@ -6,6 +6,9 @@
 @import './editor/select/style.scss';
 @import './context-menu/style.scss';
 @import './head-menu/style.scss';
+@import './dialog/style.scss';
+@import './form/style.scss';
+@import './button/style.scss';
 
 .#{$style-prefix}-layer {
     * {

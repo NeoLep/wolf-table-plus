@@ -1,4 +1,8 @@
 export default {
+    common: {
+        ok: '确定',
+        cancel: '取消',
+    },
     cut: '剪切',
     copy: '复制',
     paste: '粘贴',
@@ -33,8 +37,11 @@ export default {
     deleteStyle: '清除样式',
     deleteCell: '完全删除',
     theme_color: '主题颜色',
+    insert: '插入',
     insert_others: '插入其他',
     insert_pictures: '插入图片',
+    dataValidator: '数据验证',
+    selectorOptions: '下拉选项',
     formats: {
         normal: '正常',
         text: '文本',
@@ -47,5 +54,21 @@ export default {
         shortDate: '短日期',
         longDate: '长日期',
         time: '时间',
+    },
+    validators: {
+        dataValidator: '数据验证',
+        selectCellRange: '选择单元格范围',
+        cellRange: '单元格范围',
+        validatorType: '选项列表',
+        pleaseInputCellRange: '请输入一个单元格范围',
+        pressEnterCreate: '按回车键添加选项',
+        pleaseSetOptions: '请设置选项',
+        duplicateOption: '选项不能重复',
+        emptyOption: '选项不能为空',
+    },
+    cellRangeDialog: {
+        placeholder: '用鼠标框选单元格，或直接输入范围',
+        unselectRange: '未设置范围',
+        formatError: '格式错误',
     },
 }

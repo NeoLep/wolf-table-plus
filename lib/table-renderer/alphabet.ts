@@ -35,7 +35,7 @@ export function expr2xy(expr: string): [number, number] {
     return [indexAt(x), Number.parseInt(y, 10) - 1]
 }
 
-// x,y => B10
+// x,y => B10 - col, row
 export function xy2expr(x: number, y: number) {
     return `${stringAt(x)}${y + 1}`
 }
@@ -45,10 +45,28 @@ export function expr2expr(expr: string, xn: number, yn: number) {
     return xy2expr(x + xn, y + yn)
 }
 
+export function validExpr(expr: string): boolean {
+    // Regular expression check: uppercase letters followed by digits (digits cannot start with 0)
+    const pattern = /^([A-Z]+)(\d+)$/
+    if (!pattern.test(expr)) return false
+
+    const res = pattern.exec(expr)
+    if (!res) return false
+    const [, colLetters, rowNum] = res
+
+    // Check row number validity (1 to 1048576, Excel's max row limit)
+    const rowNumber = parseInt(rowNum, 10)
+    if (rowNumber < 1 || rowNumber > 1048576) return false
+
+    // Check column letters (A-Z only, no empty string)
+    return /^[A-Z]+$/.test(colLetters) && colLetters.length > 0
+}
+
 export default {
     stringAt,
     indexAt,
     expr2xy,
     xy2expr,
     expr2expr,
+    validExpr,
 }

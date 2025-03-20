@@ -152,7 +152,9 @@ function unionRange(t: Table, r: number, c: number) {
     const { _selector, _data } = t
     if (_selector) {
         _selector.move(r, c).updateLastRange((focusRange) => {
-            return rangeUnoinMerges(_data, focusRange.union(Range.create(r, c)))
+            const res = rangeUnoinMerges(_data, focusRange.union(Range.create(r, c)))
+            t._emitter.emit('updateFocusRange', res)
+            return res
         })
     }
 }

@@ -11,6 +11,9 @@
         "type": "git",
         "url": "git+https://github.com/NeoLep/wolf-table-plus"
     },
+    "engines": {
+        "node": ">=18"
+    },
     "scripts": {
         "lint": "eslint .",
         "prettier": "prettier --write .",
@@ -18,8 +21,10 @@
         "build": "vite build && tsc"
     },
     "dependencies": {
+        "@types/draggabilly": "^2.1.6",
         "crypto-js": "^4.2.0",
-        "dayjs": "^1.10.7"
+        "dayjs": "^1.10.7",
+        "draggabilly": "^3.0.0"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.2.0",

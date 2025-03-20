@@ -25,7 +25,7 @@
         }
 
         .line {
-            border-bottom: 2px dashed $primary-color;
+            border-bottom: 2px dashed $color-primary;
             left: 0;
             bottom: 0;
             width: 100%;
@@ -41,7 +41,7 @@
         }
 
         .line {
-            border-right: 2px dashed $primary-color;
+            border-right: 2px dashed $color-primary;
             top: 0;
             right: 0;
             height: 100%;
