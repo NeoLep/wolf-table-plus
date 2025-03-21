@@ -448,6 +448,20 @@ export default class Table {
         return this
     }
 
+    eachRange(
+        cell1: [number, number],
+        cell2: [number, number],
+        callback: (row: number, col: number) => void,
+    ) {
+        const [r1, c1] = cell1
+        const [r2, c2] = cell2
+        for (let i = r1; i <= r2; i++) {
+            for (let j = c1; j <= c2; j++) {
+                callback(i, j)
+            }
+        }
+    }
+
     cell(row: number, col: number): DataCell
     cell(row: number, col: number, value: DataCell): Table
     cell(row: number, col: number, value?: DataCell): DataCell | Table {

@@ -314,6 +314,8 @@ function moveAutofill(t: Table, direction: MoveDirection) {
 
 function move(t: Table, reselect: boolean, direction: MoveDirection, step?: number) {
     if (moveAutofill(t, direction)) return
+    t._editor?.hide()
+
     const { _selector, _data } = t
     const { viewport } = t._renderer
     if (_selector && viewport) {

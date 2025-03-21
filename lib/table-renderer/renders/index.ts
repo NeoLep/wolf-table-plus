@@ -1,10 +1,12 @@
 import { imageCanvasRender, imageToHtml, imageFromHtml } from './image'
 import { textToHtml, textCanvasRender, textFromHtml, textEditor } from './text'
 import type Table from '../..'
-import type { Rect, Style, CellRenderer, Formatter } from '..'
+import type { Rect, Style, CellRenderer, Formatter, ViewportCell } from '..'
 import type Canvas from '../canvas'
 import { SupportFormats } from '../../data/format'
 import Editor from '../../editor'
+import SelectEditor from '../../editor/select'
+import { selectCanvasRender, selectClickEvent, selectFromHtml, selectToHtml } from './select'
 
 export type CellType = 'text' | 'image' | string
 export type CellBase = {
@@ -19,13 +21,25 @@ export type CellText = CellBase & {
     type?: 'text'
     [property: string]: unknown
 }
+export type CellSelect = CellBase & {
+    type: 'select'
+    options: string[]
+}
 export type CellImages = CellBase & {
     type: 'image'
     valueType: 'url' | 'base64' | 'local'
 }
 export type CellExtends = CellBase & unknown
 
-export type Cell = CellText | CellImages | CellExtends | string | number | null | undefined
+export type Cell =
+    | CellText
+    | CellSelect
+    | CellImages
+    | CellExtends
+    | string
+    | number
+    | null
+    | undefined
 
 export type ToHtmlFuncType = (
     t: Table,
@@ -66,6 +80,7 @@ export type RenderOptionItem = {
     fromHtml: FromHtmlFuncType
     toCanvas: CanvasRenderFuncType
     editor?: () => unknown
+    clickEvent?: (table: Table, cell: any, vcell: ViewportCell, evt: MouseEvent) => void
 }
 
 export const BaseRenders: RenderOptionItem[] = [
@@ -75,6 +90,14 @@ export const BaseRenders: RenderOptionItem[] = [
         fromHtml: textFromHtml,
         toCanvas: textCanvasRender,
         editor: () => new textEditor(),
+    },
+    {
+        type: 'select',
+        toHtml: selectToHtml,
+        fromHtml: selectFromHtml,
+        toCanvas: selectCanvasRender,
+        editor: () => new SelectEditor(),
+        clickEvent: selectClickEvent,
     },
     {
         type: 'image',

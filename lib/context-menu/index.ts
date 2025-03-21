@@ -7,6 +7,8 @@ import { uploadPicture } from '../utils/upload-file'
 import type Table from '..'
 import type HElement from '../element'
 import ValidatorSelectDialog from '../validators/select'
+import { expr2xy } from '../table-renderer'
+import { CellSelect } from '../table-renderer/renders'
 
 type StatusType = boolean | ((table: Table) => boolean) | ((table: Table) => Promise<boolean>)
 
@@ -51,16 +53,47 @@ export default class ContextMenu {
 
         this.validatorSelectDialogEvents = {
             instance: new ValidatorSelectDialog(this.table, {
-                onSubmitCallback(value) {
-                    console.log(value)
+                onSubmitCallback: (value) => {
+                    const setCellValue = (r: number, c: number) => {
+                        let setValue = ''
+                        const originalValue = this.table.cellValueString(r, c)
+                        if (originalValue && value.options.includes(originalValue)) {
+                            setValue = originalValue
+                        }
+                        this.table.cell(r, c, {
+                            type: 'select',
+                            value: setValue,
+                            options: value.options,
+                        })
+                    }
+                    const range = value.cellRange.split(':')
+                    if (range.length === 1) {
+                        const [col, row] = expr2xy(range[0])
+                        setCellValue(row, col)
+                    } else {
+                        const [col, row] = expr2xy(range[0])
+                        const [col2, row2] = expr2xy(range[1])
+                        this.table.eachRange([row, col], [row2, col2], (r, c) => {
+                            setCellValue(r, c)
+                        })
+                    }
+                    this.table.render()
                 },
             }),
             show() {
                 let cellRange = ''
+                let options = [] as string[]
                 if (this.instance.table._selector) {
                     cellRange = this.instance.table._selector?.getFocusExpr().join(':')
+
+                    const cell = this.instance.table.cell(
+                        ...this.instance.table._selector._focus,
+                    ) as CellSelect
+                    if (cell?.type === 'select' && cell?.options) {
+                        options = cell.options
+                    }
                 }
-                this.instance.show({ cellRange, options: [] })
+                this.instance.show({ cellRange, options })
             },
             close() {
                 this.instance.close()

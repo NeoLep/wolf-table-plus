@@ -17,7 +17,7 @@ export default class Store {
         if (!this.pictures[md5]) {
             this.pictures[md5] = base64
         } else {
-            console.log('cached')
+            console.log('cache targeted')
         }
         return md5
     }

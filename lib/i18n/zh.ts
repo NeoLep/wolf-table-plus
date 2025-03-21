@@ -65,6 +65,7 @@ export default {
         pleaseSetOptions: '请设置选项',
         duplicateOption: '选项不能重复',
         emptyOption: '选项不能为空',
+        nullOption: '请至少提供一个选项',
     },
     cellRangeDialog: {
         placeholder: '用鼠标框选单元格，或直接输入范围',

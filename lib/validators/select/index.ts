@@ -25,7 +25,7 @@ export default class ValidatorSelectDialog {
 
     configs: {
         onBeforceCloseCallback?: () => boolean | undefined
-        onSubmitCallback?: (value: string) => void
+        onSubmitCallback?: (value: { cellRange: string; options: string[] }) => void
     }
 
     constructor(table: Table, config: typeof this.configs) {
@@ -62,8 +62,6 @@ export default class ValidatorSelectDialog {
 
     renderForm() {
         this.formContainer.html('')
-        console.log(this.data)
-
         this.formInstance = new Form(
             {
                 labelPosition: 'top',
@@ -106,6 +104,9 @@ export default class ValidatorSelectDialog {
                         rules: {
                             validator: (value: string[], callback) => {
                                 const pushedValues: string[] = []
+                                if (value.length === 0) {
+                                    callback(new Error(this.t('validators.nullOption')))
+                                }
                                 value.forEach((item) => {
                                     if (!item) {
                                         callback(new Error(this.t('validators.emptyOption')))

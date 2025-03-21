@@ -21,7 +21,7 @@ export function indexAt(str: string) {
     return ret - 1
 }
 
-// B10 => x,y
+/** (B10 => [col, row]) */
 export function expr2xy(expr: string): [number, number] {
     let x = ''
     let y = ''
@@ -35,7 +35,7 @@ export function expr2xy(expr: string): [number, number] {
     return [indexAt(x), Number.parseInt(y, 10) - 1]
 }
 
-// x,y => B10 - col, row
+/** (col, row) => B10 */
 export function xy2expr(x: number, y: number) {
     return `${stringAt(x)}${y + 1}`
 }

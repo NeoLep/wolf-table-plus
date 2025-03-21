@@ -1,6 +1,7 @@
 import editor from '../index.editor'
 import selector from '../index.selector'
 import scrollbar from '../index.scrollbar'
+import Renders, { cellTypeGetter } from '../table-renderer/renders'
 
 import type { Border, Style } from '../table-renderer'
 import type { SupportFormats } from '../data/format'
@@ -69,7 +70,16 @@ export default class Events {
             const vcell = viewport.cellAt(offsetX, offsetY)
             if (vcell) {
                 _emitter.emit('click', vcell, evt)
+
                 const { placement, row, col } = vcell
+                const cell = this.table.cell(row, col)
+                // vcell, evt
+                // console.log(cell)
+                // this.table._renders
+                if (cell) {
+                    const type = cellTypeGetter(cell)
+                    Renders.use().options[type].clickEvent?.(this.table, cell, vcell, evt)
+                }
                 if (shiftKey) {
                     // 基于已选进行聚合选择
                     selector.unionRange(this.table, row, col)

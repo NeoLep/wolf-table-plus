@@ -2,6 +2,7 @@ import { Rect } from '../../table-renderer'
 import Editor from '..'
 import { stylePrefix } from '../../config'
 import HElement, { h } from '../../element'
+import { CellSelect } from '../../table-renderer/renders'
 
 type Position = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 type OptionsFunc = (q: string) => Promise<(string | string[])[]>
@@ -9,9 +10,9 @@ type OptionsFunc = (q: string) => Promise<(string | string[])[]>
 export default class SelectEditor extends Editor {
     _searchInput: HElement
     _content: HElement
-    _width: number = 300
+    _width: number = 150
     _height: number = 320
-    _position: Position = 'bottom-right'
+    _position: Position = 'bottom-left'
     _options: OptionsFunc | null = null
 
     constructor() {
@@ -63,29 +64,65 @@ export default class SelectEditor extends Editor {
 
     rect(rect: Rect | null) {
         if (rect) {
-            const { _position } = this
+            let { _position } = this
             this._rect = rect
             this._visible = true
-            const { x, y, width, height } = rect
-            let left = x,
-                top = y + height
-            if (_position === 'top-right' || _position === 'bottom-right') {
-                left += width - this._width
-            }
-            if (_position === 'top-right' || _position === 'top-left') {
-                top -= this._height
-            }
-            this._.css({
-                left,
-                top,
-                width: this._width,
-                height: this._height,
-            })
+            setTimeout(() => {
+                this._height = 0
+                this._._.childNodes.forEach((d, index) => {
+                    this._height += (d as HTMLElement).clientHeight
+                    if (index === 1) {
+                        this._width = (d as HTMLElement).clientWidth
+                    }
+                })
+
+                const calc = () => {
+                    const { x, y, width, height } = rect
+                    let left = x,
+                        top = y + height
+                    if (_position === 'top-right' || _position === 'bottom-right') {
+                        left += width - this._width
+                    }
+                    if (_position === 'top-right' || _position === 'top-left') {
+                        top -= this._height + (rect.height || 25) + 3
+                    }
+
+                    return { top, left }
+                }
+
+                let { top, left } = calc()
+                if (top < 0) {
+                    _position = _position.replace('top', 'bottom') as Position
+                    top = calc().top
+                }
+                if (left < 0) {
+                    _position = _position.replace('left', 'right') as Position
+                    left = calc().left
+                }
+
+                this._.css({
+                    left,
+                    top,
+                })
+            }, 0)
         }
         return this
     }
 
     show() {
+        this._searchInput.value('')
+        const cell = this._value as CellSelect
+        if (cell.type !== 'select') return this
+        this.options(
+            (qword: string) =>
+                new Promise((resolve, reject) => {
+                    const cell = this._value as CellSelect
+                    if (cell.type !== 'select') resolve([])
+                    resolve(
+                        cell.options.filter((v) => v.toLowerCase().includes(qword.toLowerCase())),
+                    )
+                }),
+        )
         this.query('')
         super.show()
         return this

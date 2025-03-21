@@ -3,6 +3,7 @@
 .#{$style-prefix}-select {
     position: absolute;
     pointer-events: auto;
+    width: auto;
     border-radius: 2px;
     outline: 0;
     background: #fff;
@@ -15,15 +16,16 @@
 }
 
 .#{$style-prefix}-select-input {
-    width: auto;
+    width: 100%;
+    box-sizing: border-box !important;
     display: flex;
     padding: 13px 10px;
-    min-width: 10rem;
     // background: #f3f4f5;
     border-bottom: 1px solid rgba(34, 36, 38, 0.1);
 
     input {
         z-index: 1;
+        box-sizing: border-box!important;
         margin: 0;
         max-width: 100%;
         flex: 1 0 auto;

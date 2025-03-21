@@ -174,7 +174,9 @@ if (container) {
     //     color: 'red',
     // })
 
-    // wt.cell(2, 2, { type: 'datasource', value: 'CHN' })
+    wt.cell(2, 2, { type: 'select', value: 'CHN', options: ['CHN', 'USA"', 'BRA'] })
+        .cell(2, 3, { type: 'select', value: 'CHN', options: ['A', 'B', 'C'] })
+        .render()
     //     .cell(2, 3, { type: 'datasource', value: 'USA' })
     //     .render()
 }
