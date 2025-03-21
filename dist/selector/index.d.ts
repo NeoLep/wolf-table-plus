@@ -59,5 +59,6 @@ export default class Selector {
     showCopy(): void;
     clearCopy(): void;
     clear(): void;
+    getFocusExpr(): string[];
 }
 export {};

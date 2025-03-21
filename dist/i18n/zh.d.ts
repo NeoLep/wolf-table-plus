@@ -1,4 +1,8 @@
 declare const _default: {
+    common: {
+        ok: string;
+        cancel: string;
+    };
     cut: string;
     copy: string;
     paste: string;
@@ -33,8 +37,11 @@ declare const _default: {
     deleteStyle: string;
     deleteCell: string;
     theme_color: string;
+    insert: string;
     insert_others: string;
     insert_pictures: string;
+    dataValidator: string;
+    selectorOptions: string;
     formats: {
         normal: string;
         text: string;
@@ -47,6 +54,23 @@ declare const _default: {
         shortDate: string;
         longDate: string;
         time: string;
+    };
+    validators: {
+        dataValidator: string;
+        selectCellRange: string;
+        cellRange: string;
+        validatorType: string;
+        pleaseInputCellRange: string;
+        pressEnterCreate: string;
+        pleaseSetOptions: string;
+        duplicateOption: string;
+        emptyOption: string;
+        nullOption: string;
+    };
+    cellRangeDialog: {
+        placeholder: string;
+        unselectRange: string;
+        formatError: string;
     };
 };
 export default _default;

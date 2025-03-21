@@ -1,6 +1,10 @@
 export default class I18n {
     static messages: {
         en: {
+            common: {
+                ok: string;
+                cancel: string;
+            };
             cut: string;
             copy: string;
             paste: string;
@@ -35,8 +39,11 @@ export default class I18n {
             deleteStyle: string;
             deleteCell: string;
             theme_color: string;
+            insert: string;
             insert_others: string;
             insert_pictures: string;
+            dataValidator: string;
+            selectorOptions: string;
             formats: {
                 normal: string;
                 text: string;
@@ -50,8 +57,29 @@ export default class I18n {
                 longDate: string;
                 time: string;
             };
+            validators: {
+                dataValidator: string;
+                selectCellRange: string;
+                cellRange: string;
+                validatorType: string;
+                pleaseInputCellRange: string;
+                pressEnterCreate: string;
+                pleaseSetOptions: string;
+                duplicateOption: string;
+                emptyOption: string;
+                nullOption: string;
+            };
+            cellRangeDialog: {
+                placeholder: string;
+                unselectRange: string;
+                formatError: string;
+            };
         };
         zh: {
+            common: {
+                ok: string;
+                cancel: string;
+            };
             cut: string;
             copy: string;
             paste: string;
@@ -86,8 +114,11 @@ export default class I18n {
             deleteStyle: string;
             deleteCell: string;
             theme_color: string;
+            insert: string;
             insert_others: string;
             insert_pictures: string;
+            dataValidator: string;
+            selectorOptions: string;
             formats: {
                 normal: string;
                 text: string;
@@ -100,6 +131,23 @@ export default class I18n {
                 shortDate: string;
                 longDate: string;
                 time: string;
+            };
+            validators: {
+                dataValidator: string;
+                selectCellRange: string;
+                cellRange: string;
+                validatorType: string;
+                pleaseInputCellRange: string;
+                pressEnterCreate: string;
+                pleaseSetOptions: string;
+                duplicateOption: string;
+                emptyOption: string;
+                nullOption: string;
+            };
+            cellRangeDialog: {
+                placeholder: string;
+                unselectRange: string;
+                formatError: string;
             };
         };
     };

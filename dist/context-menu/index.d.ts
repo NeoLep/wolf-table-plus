@@ -1,5 +1,6 @@
 import type Table from '..';
 import type HElement from '../element';
+import ValidatorSelectDialog from '../validators/select';
 type StatusType = boolean | ((table: Table) => boolean) | ((table: Table) => Promise<boolean>);
 type BaseOption = {
     id: string;
@@ -28,6 +29,11 @@ export default class ContextMenu {
     _contextElement: HElement;
     hiddenOption: string[] | ((table: Table) => string[]);
     _extendOptions: OptionsResultType[];
+    validatorSelectDialogEvents: {
+        instance: ValidatorSelectDialog;
+        show: Function;
+        close: Function;
+    };
     constructor(table: Table);
     options: () => OptionsResultType[];
     show(evt: MouseEvent & {

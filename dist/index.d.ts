@@ -123,6 +123,7 @@ export default class Table {
     addBorder(...value: Border): this;
     clearBorder(value: string): this;
     clearBorders(): this;
+    eachRange(cell1: [number, number], cell2: [number, number], callback: (row: number, col: number) => void): void;
     cell(row: number, col: number): DataCell;
     cell(row: number, col: number, value: DataCell): Table;
     cellValue(row: number, col: number): DataCellValue;
