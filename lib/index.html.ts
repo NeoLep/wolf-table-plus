@@ -124,7 +124,7 @@ export function toHtml(t: Table, from: string) {
                     cssStyleStr += style2css(t.style(cell.style, true))
                 }
 
-                htmlStr += `style="${cssStyleStr ? `${cssStyleStr};` : ''} position: relative;"`
+                htmlStr += `style="${cssStyleStr ? `${cssStyleStr};` : ''} position: relative; padding: 0 5px;"`
 
                 const cellType = cellTypeGetter(cell)
                 htmlStr += Renders.use().getRender(cellType).toHtml(t, cell, r, c, htmlStr)

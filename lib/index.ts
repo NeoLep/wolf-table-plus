@@ -56,6 +56,7 @@ import type Selector from './selector'
 import type Resizer from './resizer'
 import type Scrollbar from './scrollbar'
 import Renders, { CellText } from './table-renderer/renders'
+import Printer from './index.printer'
 
 export type TableRendererOptions = {
     style?: Partial<Style>
@@ -147,6 +148,8 @@ export default class Table {
 
     _i18n: I18n
 
+    _printer: Printer
+
     constructor(
         element: HTMLElement | string,
         width: () => number,
@@ -223,6 +226,7 @@ export default class Table {
         this._events = new Events(this) // init events
         this._history = new History() // history init
         this._contextMenu = new ContextMenu(this) // context menu
+        this._printer = new Printer(this) // printer
         injectFormatters(this._cells, (index: number) => this.style(index, false)) // inject formatter
     }
 

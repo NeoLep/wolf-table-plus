@@ -1,8 +1,4 @@
 export default {
-    common: {
-        ok: '确定',
-        cancel: '取消',
-    },
     cut: '剪切',
     copy: '复制',
     paste: '粘贴',
@@ -10,6 +6,7 @@ export default {
     redo: '恢复',
     onlyPasteValue: '仅粘贴内容',
     delete: '删除',
+    printSheet: '打印',
     paintformat: '格式刷',
     clearformat: '清除格式',
     valueformat: '数据格式',
@@ -42,6 +39,10 @@ export default {
     insert_pictures: '插入图片',
     dataValidator: '数据验证',
     selectorOptions: '下拉选项',
+    common: {
+        ok: '确定',
+        cancel: '取消',
+    },
     formats: {
         normal: '正常',
         text: '文本',
@@ -71,5 +72,9 @@ export default {
         placeholder: '用鼠标框选单元格，或直接输入范围',
         unselectRange: '未设置范围',
         formatError: '格式错误',
+    },
+    print: {
+        letter: '信纸',
+        legal: '法律专用纸',
     },
 }

@@ -1,4 +1,5 @@
 import Divider from './buttons/divider'
+import PrintButton from './buttons/print'
 import UndoButton from './buttons/undo'
 import RedoButton from './buttons/redo'
 import PaintformatButton from './buttons/paintformat'
@@ -19,6 +20,7 @@ export default function (table: Table) {
     return [
         new UndoButton(table).tooltip({ title: t('undo'), shortkey: '(Ctrl + Z)' }),
         new RedoButton(table).tooltip({ title: t('redo'), shortkey: '(Ctrl + Y)' }),
+        new PrintButton(table).tooltip({ title: t('printSheet'), shortkey: '(Ctrl + P)' }),
         new PaintformatButton(table).tooltip(t('paintformat')),
         new ClearformatButton(table).tooltip(t('clearformat')),
         new Divider(table),

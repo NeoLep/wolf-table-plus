@@ -30,7 +30,7 @@ export default class Dialog {
         closeOnClickMask?: boolean
         draggable?: boolean
 
-        onBeforeClose?: () => boolean | undefined
+        onBeforeClose?: () => boolean | undefined | void
     }
 
     constructor(content: HElement | HElement[], config: typeof this.conf = {}) {
