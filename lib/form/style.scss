@@ -33,28 +33,62 @@
     .#{$style-prefix}-form-item--input_wrapper {
       padding: 1px 11px;
       border: $border-darker;
-      display: flex;
       height: 32px;
       line-height: 32px;
+      display: inline-flex;
+      flex-grow: 1;
+      align-items: center;
+      justify-content: center;
       .#{$style-prefix}-form-item--input {
         border: none;
         height: 100%;
+        width: 100%;
+        flex-grow: 1;
         &:focus {
           border-color: $color-primary !important;
         }
       }
     }
+    .#{$style-prefix}-form-item--select_wrapper {
+      .#{$style-prefix}-form-item--input.#{$style-prefix}-form-item--select {
+        position: relative;
+        line-height: 28px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .is-placeholder {
+        color: $text-color-placeholder;
+        font-size: 14px;
+      }
+
+      .option-container {
+        // display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        border: $border-darker;
+        box-shadow: $box-shadow-light;
+        padding: 6px 0;
+        .option-item {
+          padding: 0 11px;
+          cursor: pointer;
+          &:hover {
+            background-color: $bg-dark-fill;
+          }
+        }
+      }
+    }
     .#{$style-prefix}-form-item--input_wrapper--suffix {
-      padding-right: 42px !important;
+      // padding-right: 42px !important;
       position: relative;
       .#{$style-prefix}-form-item--input_wrapper--suffix-container {
-        position: absolute;
-        width: 29px;
-        height: 29px;
+        // position: absolute;
+        // width: 29px;
+        // height: 29px;
+        width: auto;
         overflow: hidden;
-        right: 0px;
-        top: 50%;
-        transform: translateY(-50%);
+        // right: 0px;
+        // top: 50%;
+        // transform: translateY(-50%);
 
       }
     }

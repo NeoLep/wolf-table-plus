@@ -17,7 +17,7 @@ export default class HeadMenu {
 
         this._headMenuElement = h('div', `${stylePrefix}-head-menu`)
         this._headMenuElement.css({
-            height: this.height,
+            height: `${this.height}px`,
         })
 
         this.init()

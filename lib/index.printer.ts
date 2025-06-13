@@ -1,6 +1,8 @@
 import printjs from 'print-js'
 import Dialog from './dialog'
 import Table, { h } from '.'
+import Button from './button'
+import Form, { FormItemInput, FormItemSelect } from './form'
 
 export type PaperConf = {
     label?: string
@@ -48,6 +50,9 @@ export default class Printer {
                 console.log('onBeforeClose')
             },
         })
+        this.dialog.containerHeader.hide()
+        this.dialog.containerFooter.hide()
+        this.dialog.container.css('padding', '0')
     }
     getPaperByCode(code: string) {
         let r = this.papers.find((paper) => paper.code === code)
@@ -73,14 +78,113 @@ export default class Printer {
         return mm1
     }
 
+    renderPapaer() {
+        this.dialog.updateConfig({
+            title: this.currentPaper?.label || '',
+            width: '80vw',
+            height: '90vh',
+        })
+        this.dialog.containerBody.css('height', '100%')
+
+        const form = new Form(
+            {
+                fields: [
+                    {
+                        label: '纸张尺寸',
+                        prop: 'paper',
+                        component: (() => {
+                            const comp = new FormItemSelect('', {
+                                placeholder: '请选择纸张尺寸',
+                                clearable: true,
+                                options: this.papers.map((paper) => ({
+                                    label: this.table._i18n.t(paper.label) || paper.code,
+                                    value: paper.code,
+                                })),
+                            })
+
+                            comp.on('change', (value: string) => {
+                                renderAreaFunc(value)
+                            })
+                            return comp
+                        })(),
+                    },
+                ],
+            },
+            { paper: this.currentPaper?.code },
+        )._.setStyles({
+            padding: '10px',
+            flex: 1,
+        })
+        const printButton = new Button(this.table._i18n.t('printSheet'), 'primary')
+        const cancelButton = new Button(this.table._i18n.t('common.cancel'), 'default')
+        cancelButton._.css('margin-right', '10px')
+        const confArea = h('div')
+            .setStyles({
+                width: '250px',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+            })
+            .append(
+                form._,
+                h('div')
+                    .setStyles({ display: 'flex', flexDirection: 'row-reverse', padding: '10px' })
+                    .append(printButton._, cancelButton._),
+            )
+
+        const renderArea = h('div').css({
+            height: '100%',
+            flex: 1,
+            background: '#dadce0',
+            overflow: 'auto',
+            paddingTop: '20px',
+            boxSizing: 'border-box',
+        })
+        const renderAreaFunc = (paper?: string) => {
+            const r = paper ? this.getPaperByCode(paper) : undefined
+            if (r) {
+                this.currentPaper = r
+            }
+            if (!this.currentPaper) return
+
+            renderArea._.innerHTML = ''
+
+            const [paperWidthPx, paperHeightPx] = this.currentPaper.sizePx
+            console.log([paperWidthPx, paperHeightPx])
+            const paperDom = h('div').setStyles({
+                width: `${paperWidthPx}px`,
+                height: `${paperHeightPx}px`,
+                background: '#fff',
+                margin: '0 auto 20px',
+                padding: '20px',
+                boxSizing: 'border-box',
+            })
+            paperDom._.innerHTML = this.table.toHtml('A1:J40')
+            renderArea.append(paperDom)
+        }
+
+        renderAreaFunc()
+
+        const container = h('div')
+            .css('height', '100%')
+            .css('display', 'flex')
+            .append(renderArea, confArea)
+        this.dialog.containerBody._.innerHTML = ''
+        this.dialog.containerBody.append(container)
+
+        this.dialog.show()
+    }
+
     print() {
         if (!this.currentPaper) {
             this.currentPaper = this.getPaperByCode('A4')!
         }
 
+        this.renderPapaer()
+
         // console.log(this.currentPaper)
 
-        const area = 'A1:J40'
+        // const area = 'A1:J40'
         // PDFJS
         // const container = document.createElement('div')
         // container.setAttribute('id', 'wp-print-container')
@@ -95,21 +199,20 @@ export default class Printer {
         // })
 
         // NATIVE
-        const iframe: any = document.createElement('IFRAME')
-        iframe.setAttribute('id', 'print-iframe')
-        this.dialog.container._.innerHTML = ''
-        this.dialog.container.append(iframe)
-        this.dialog.show()
-        const doc = iframe.contentWindow.document
-        doc.write(this.table.toHtml(area))
-        const r = doc.querySelector('table')
-        r.style.width = '1000px'
-        doc.close()
-        iframe.contentWindow.focus()
-        iframe.contentWindow.print()
-        if (navigator.userAgent.indexOf('MSIE') > 0) {
-            document.body.removeChild(iframe)
-        }
+        // const iframe: any = document.createElement('IFRAME')
+        // iframe.setAttribute('id', 'print-iframe')
+        // this.dialog.container._.innerHTML = ''
+        // this.dialog.container.append(iframe)
+        // this.dialog.show()
+        // const doc = iframe.contentWindow.document
+        // doc.write(this.table.toHtml(area))
+        // const r = doc.querySelector('table')
+        // doc.close()
+        // iframe.contentWindow.focus()
+        // iframe.contentWindow.print()
+        // if (navigator.userAgent.indexOf('MSIE') > 0) {
+        //     document.body.removeChild(iframe)
+        // }
 
         // TEST
         // const shadow = document.createElement('div')

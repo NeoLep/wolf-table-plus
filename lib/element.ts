@@ -1,3 +1,4 @@
+import type * as CSS from 'csstype'
 function createFragment(...nodes: (HElement | Node | string)[]) {
     const fragment = document.createDocumentFragment()
     nodes.forEach((node) => {
@@ -10,14 +11,16 @@ function createFragment(...nodes: (HElement | Node | string)[]) {
     return fragment
 }
 
-export type CSSAttrs = {
-    left?: number
-    top?: number
-    width?: number
-    height?: number
-    position?: string
-    [property: string]: unknown
+/**
+ * 将驼峰字符转换为中划线字符
+ * @param {string} str 需要转换的字符
+ * @returns 示例:TButtonTest1 => t-button-test-1
+ */
+export function camelCaseToKebabCase(str: string) {
+    return str.replace(/([a-zA-Z])([A-Z])/g, '$1-$2').toLowerCase()
 }
+
+export type CSSAttrs = Partial<CSS.Properties>
 
 export default class HElement {
     _: HTMLElement
@@ -116,20 +119,29 @@ export default class HElement {
     css(key: string, value: string): HElement
     css(key: string | CSSAttrs, value?: string): string | HElement {
         const { style } = this._
-        if (value && typeof key === 'string') {
-            style.setProperty(key, value)
-            return this
-        }
-
         if (typeof key === 'string') {
-            return style.getPropertyValue(key)
+            if (value) {
+                style.setProperty(key, value)
+                return this
+            } else {
+                return style.getPropertyValue(key)
+            }
         }
 
-        Object.keys(key).forEach((k) => {
-            let v = key[k]
-            if (typeof v === 'number') v = `${v}px`
-            style.setProperty(k, v as string)
-        })
+        return this.setStyles(key)
+    }
+
+    setStyles(props: CSSAttrs): HElement {
+        const { style } = this._
+        for (const prop in props) {
+            let value = props[prop as keyof CSSAttrs]
+            if (typeof value === 'number') {
+                value = value + 'px'
+            }
+            if (value !== undefined) {
+                style.setProperty(camelCaseToKebabCase(prop), String(value))
+            }
+        }
         return this
     }
 
@@ -149,6 +161,10 @@ export default class HElement {
 
     computedStyle() {
         return window.getComputedStyle(this._)
+    }
+
+    isShow() {
+        return this.css('display') !== 'none'
     }
 
     show(flag = true) {

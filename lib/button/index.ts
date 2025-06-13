@@ -1,5 +1,5 @@
 import { stylePrefix } from '../config'
-import HElement, { h } from '../element'
+import HElement, { CSSAttrs, h } from '../element'
 
 export default class Button {
     _ = h('button', `${stylePrefix}-bse-button`).attr('type', 'button')
@@ -9,6 +9,7 @@ export default class Button {
               padding?: string
               noneBorder?: boolean
               onClick?: () => void
+              style?: CSSAttrs
           }
         | undefined
 
@@ -49,6 +50,9 @@ export default class Button {
         }
         if (this.configs?.noneBorder) {
             this._.addCss('none-border')
+        }
+        if (this.configs?.style) {
+            this._.setStyles(this.configs!.style)
         }
     }
 }

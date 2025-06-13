@@ -13,7 +13,11 @@ export default class Dialog {
         h('div', `${stylePrefix}-dialog__header__title`),
         this.closeIcon,
     )
-    containerBody: HElement = h('div', `${stylePrefix}-dialog__body`)
+    containerBody: HElement = h('div', `${stylePrefix}-dialog__body`).css(
+        'box-sizing',
+        'border-box',
+    )
+
     containerFooter: HElement = h('div', `${stylePrefix}-dialog__footer`)
 
     hasInserted = false
@@ -24,6 +28,7 @@ export default class Dialog {
 
         title?: string
         width?: string
+        height?: string
 
         disableMask?: boolean
         maskColor?: string
@@ -63,6 +68,7 @@ export default class Dialog {
             this.close()
         })
         this.container.on('click', (evt) => {
+            document.dispatchEvent(new Event('click', evt as MouseEvent))
             ;(evt as MouseEvent).stopPropagation()
         })
 
@@ -116,6 +122,9 @@ export default class Dialog {
         }
         if (this.conf?.width) {
             this.container.css('width', this.conf.width)
+        }
+        if (this.conf?.height) {
+            this.container.css('height', this.conf.height)
         }
     }
 
