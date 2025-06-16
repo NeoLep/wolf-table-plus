@@ -35,7 +35,8 @@ export default class Printer {
     })
     currentPaper: (PaperConf & { sizePx: [number, number] }) | undefined
 
-    MmPx: number = this.getPXEveryMM() // 每毫米的对应的像素值
+    // MmPx: number = this.getPXEveryMM() // 每毫米的对应的像素值
+    dpi = this.getDeviceDPI()
 
     table: Table
     dialog: Dialog
@@ -62,20 +63,43 @@ export default class Printer {
         }
         return {
             ...r,
-            sizePx: [Math.floor(r!.size[0] * this.MmPx), Math.floor(r!.size[1] * this.MmPx)],
+            sizePx: [this.transferMMToPX(r!.size[0]), this.transferMMToPX(r!.size[1])],
         } as typeof this.currentPaper
     }
 
+    getDeviceDPI() {
+        let dpi = 96 // 默认值 96dpi
+
+        if (
+            window.screen &&
+            (window.screen as any).deviceXDPI &&
+            (window.screen as any).logicalXDPI
+        ) {
+            dpi = ((window.screen as any).deviceXDPI / (window.screen as any).logicalXDPI) * dpi
+        } else if (window.devicePixelRatio) {
+            dpi = dpi * window.devicePixelRatio
+        }
+
+        return dpi
+    }
     getPXEveryMM() {
+        console.log(this.getDeviceDPI())
         // 缓存每毫米的像素值
         const div = document.createElement('div')
         div.style.width = '1mm'
         document.body.appendChild(div)
 
         const { width } = div.getBoundingClientRect()
-        const mm1 = Math.floor(width * 100) / 100 // 保留两位小数先向下取整
+        const mm1 = (width * 100) / 100 // 保留两位小数先向下取整
         div.remove()
         return mm1
+    }
+
+    transferMMToPX(size: number) {
+        return (size * this.dpi) / 25.4
+    }
+    transferPXToMM(px: number) {
+        return (px * 25.4) / this.dpi
     }
 
     renderPapaer() {
@@ -110,11 +134,14 @@ export default class Printer {
                     },
                 ],
             },
-            { paper: this.currentPaper?.code },
-        )._.setStyles({
+            { paper: this.currentPaper?.code, padding: 10 },
+        )
+
+        form._.setStyles({
             padding: '10px',
             flex: 1,
         })
+
         const printButton = new Button(this.table._i18n.t('printSheet'), 'primary')
         const cancelButton = new Button(this.table._i18n.t('common.cancel'), 'default')
         cancelButton._.css('margin-right', '10px')
@@ -140,6 +167,7 @@ export default class Printer {
             paddingTop: '20px',
             boxSizing: 'border-box',
         })
+
         const renderAreaFunc = (paper?: string) => {
             const r = paper ? this.getPaperByCode(paper) : undefined
             if (r) {
@@ -150,20 +178,191 @@ export default class Printer {
             renderArea._.innerHTML = ''
 
             const [paperWidthPx, paperHeightPx] = this.currentPaper.sizePx
-            console.log([paperWidthPx, paperHeightPx])
+            const padding = this.transferMMToPX(form.getValue().padding || 10) // mm => px
+
+            // console.log([paperWidthPx, paperHeightPx])
+
             const paperDom = h('div').setStyles({
                 width: `${paperWidthPx}px`,
                 height: `${paperHeightPx}px`,
                 background: '#fff',
                 margin: '0 auto 20px',
-                padding: '20px',
+                padding: `${padding}px`,
                 boxSizing: 'border-box',
+                overflow: 'hidden',
             })
-            paperDom._.innerHTML = this.table.toHtml('A1:J40')
-            renderArea.append(paperDom)
+
+            const getContent = () => {
+                // paper
+                const innerWidth = Number((paperWidthPx - padding * 2).toFixed(2))
+                const innerHeight = Number((paperHeightPx - padding * 2).toFixed(2))
+
+                const parser = new DOMParser()
+                const doc = parser.parseFromString(this.table.toHtml('A1:J50'), 'text/html')
+                const tableElement = doc.body.firstChild as HTMLElement
+
+                // iterater table
+
+                const pages: HTMLElement[][] = []
+                // get every col width
+                const tdWidthArr: number[] = []
+                tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
+                    const width = Number(item.getAttribute('width'))
+                    tdWidthArr.push(!Number.isNaN(width) ? width : 100)
+                })
+
+                // each tr
+                const trDoms = tableElement.querySelectorAll('tr')
+                let currentInsertIndex = 0
+
+                let reduceHeight = innerHeight
+                let rowOffset = 0
+                trDoms.forEach((tr, rowIndex) => {
+                    let currentInsertIndex2 = 0
+                    const trHeight = Number(tr.style.height.replaceAll('px', ''))
+                    if (reduceHeight < trHeight) {
+                        rowOffset = rowIndex
+                        currentInsertIndex++
+                        reduceHeight = innerHeight
+                    }
+
+                    if (!pages[currentInsertIndex]) pages[currentInsertIndex] = []
+
+                    const tdDoms = tr.querySelectorAll('td')
+                    let reduceWidth = innerWidth
+                    let colOffset = 0
+                    tdDoms.forEach((td, colIndex) => {
+                        const tdWidth = tdWidthArr[colIndex]
+                        if (reduceWidth < tdWidth) {
+                            const oldTable = pages[currentInsertIndex][currentInsertIndex2]
+                            if (oldTable) {
+                                oldTable.style.width = `${innerWidth - reduceWidth}px`
+                                reduceWidth = innerWidth
+                            }
+                            colOffset = colIndex
+                            currentInsertIndex2++
+                        }
+
+                        td.style.width = `${tdWidth}px`
+
+                        let currTable = pages[currentInsertIndex][currentInsertIndex2]
+                        if (!currTable) {
+                            currTable = document.createElement('table')
+                            currTable.style.borderSpacing = '0'
+                            currTable.style.borderCollapse = 'collapse'
+                            pages[currentInsertIndex][currentInsertIndex2] = currTable
+                        }
+
+                        if (colIndex === tdDoms.length - 1) {
+                            currTable.style.width = `${innerWidth - reduceWidth}px`
+                        }
+
+                        let tbody = currTable.querySelector('tbody')
+                        if (!tbody) {
+                            tbody = document.createElement('tbody')
+                            currTable.appendChild(tbody)
+                        }
+
+                        let currTr = tbody.querySelectorAll('tr')[rowIndex - rowOffset]
+                        if (!currTr) {
+                            currTr = tr.cloneNode() as HTMLTableRowElement
+                            tbody.appendChild(currTr)
+                        }
+
+                        currTr.appendChild(td.cloneNode(true))
+                        reduceWidth -= tdWidth
+                    })
+
+                    reduceHeight -= trHeight
+                })
+
+                const allPages = document.createElement('div')
+                pages.flat().forEach((table) => {
+                    const paper = paperDom.cloneNode() as HTMLElement
+                    paper.className = 'paper'
+                    paper.style.position = 'relative'
+                    const paperContainer = document.createElement('div')
+                    paperContainer.style.overflow = 'hidden'
+                    paperContainer.style.height = '100%'
+                    paper.appendChild(paperContainer)
+                    paperContainer.appendChild(table)
+                    allPages.appendChild(paper)
+                })
+
+                // if (tableElement) {
+                //     // 获取 dom 的宽高
+                //     let width = 0
+                //     tableElement.querySelectorAll('table colgroup col')?.forEach((colE) => {
+                //         width += Number(colE.getAttribute('width') || 0)
+                //     })
+                //     tableElement.style.width = `${width}px`
+                //     const height = tableElement.clientHeight
+
+                //     const tableBodyElement = tableElement.querySelector('tbody')!
+                //     const trs = tableElement.querySelectorAll('tr')
+                //     let remainHeight = innerHeight
+                //     trs.forEach((tr) => {
+                //         const trHeight = Number(tr.style.height.replaceAll('px', ''))
+                //         if (remainHeight < trHeight) {
+                //             const insertTr = document.createElement('tr')
+                //             insertTr.className = 'useless-tr'
+                //             insertTr.style.height = `${remainHeight}px`
+                //             tableBodyElement.insertBefore(insertTr, tr)
+                //             remainHeight = innerHeight
+                //         } else {
+                //             remainHeight -= trHeight
+                //         }
+                //     })
+                // }
+                // paperContainer.appendChild(tableElement)
+                return {
+                    page: allPages,
+                }
+            }
+
+            const contentInfo = getContent()
+            renderArea.append(contentInfo.page)
+
+            return contentInfo
         }
 
-        renderAreaFunc()
+        const content = renderAreaFunc()
+
+        cancelButton._.on('click', () => {
+            this.dialog.close()
+        })
+        printButton._.on('click', () => {
+            const iframe: any = document.createElement('IFRAME')
+            iframe.setAttribute('id', 'print-iframe')
+            document.body.append(iframe)
+
+            const doc = iframe.contentWindow.document
+            doc.head.innerHTML = `
+                <style>
+                * {
+                    padding: 0;
+                    margin: 0;
+                }
+                </style>
+            `
+
+            const renderDoms: HTMLElement[] = []
+            content?.page.querySelectorAll('.paper').forEach((p) => {
+                renderDoms.push(p.cloneNode(true) as HTMLElement)
+            })
+
+            doc.body.append(...renderDoms)
+            doc.close()
+
+            iframe.contentWindow.focus()
+            iframe.contentWindow.print()
+
+            setTimeout(() => {
+                document.body.removeChild(iframe)
+            }, 50)
+            // if (navigator.userAgent.indexOf('MSIE') > 0) {
+            // }
+        })
 
         const container = h('div')
             .css('height', '100%')
