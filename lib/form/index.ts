@@ -98,6 +98,9 @@ export default class Form {
             const formError = h('div', `${stylePrefix}-form-item__error`)
             if (field.component?._) {
                 field.component.setValue(this.form[field.prop])
+                field.component.on('change', (value: any) => {
+                    this.form[field.prop] = value
+                })
                 formContent.append(field.component!._)
                 field.component.render()
                 if (field.rules) {

@@ -2,7 +2,7 @@ import './style.index.scss'
 import { stylePrefix } from './config'
 import HElement, { h } from './element'
 import Overlayer from './overlayer'
-import TableRenderer, { Range, expr2xy } from './table-renderer'
+import TableRenderer, { Range, expr2xy, xy2expr } from './table-renderer'
 import {
     defaultData,
     row,
@@ -166,8 +166,8 @@ export default class Table {
         this._data = defaultData()
 
         this._Layer = h(container, `${stylePrefix}-layer`).css({
-            height: height(),
-            width: width(),
+            height: `${height()}px`,
+            width: `${width()}px`,
         })
 
         if (!options?.hideHeadMenu) {
@@ -179,8 +179,8 @@ export default class Table {
         this._height = () => height() - (this._headMenu?.height || 0)
 
         this._container = h('div', `${stylePrefix}-container`).css({
-            height: this._height(),
-            width: width(),
+            height: `${this._height()}px`,
+            width: `${width()}px`,
         })
         this._Layer.append(this._container)
 
@@ -239,7 +239,7 @@ export default class Table {
     }
 
     resize() {
-        this._container.css({ height: this._height(), width: this._width() })
+        this._container.css({ height: `${this._height()}px`, width: `${this._width()}px` })
         this._renderer.width(this._width())
         this._renderer.height(this._height())
         this.render()
@@ -664,6 +664,38 @@ export default class Table {
      */
     toHtml(from: string): string {
         return toHtml(this, from)
+    }
+
+    /** () => [col, row] */
+    getMaxArea() {
+        let maxRow = 0
+        let maxCol = 0
+
+        const d = this.data()
+        d.borders.forEach((b) => {
+            const expr = b[0].split(':').slice(-1)[0]
+            const xy2 = expr2xy(expr)
+            maxCol = Math.max(maxCol, xy2[0])
+            maxRow = Math.max(maxRow, xy2[1])
+        })
+        d.cells.forEach((item) => {
+            if (item) {
+                let [row, col] = item
+                const expr = xy2expr(col, row)
+
+                const merge2Expr = d.merges.filter((i) => i.includes(expr))
+                if (merge2Expr.length > 0) {
+                    const xy2 = expr2xy(merge2Expr[0].split(':')[1])
+                    col = Math.max(col, xy2[0])
+                    row = Math.max(row, xy2[1])
+                }
+
+                // console.log(expr)
+                maxRow = Math.max(maxRow, row)
+                maxCol = Math.max(maxCol, col)
+            }
+        })
+        return [maxCol, maxRow] as const
     }
 
     toArrays(from: string): DataCellValue[][] {

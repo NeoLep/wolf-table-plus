@@ -116,12 +116,17 @@ export default class HElement {
 
     css(key: string): string
     css(props: CSSAttrs): HElement
-    css(key: string, value: string): HElement
-    css(key: string | CSSAttrs, value?: string): string | HElement {
+    css(key: string, value: string, priority?: string): HElement
+    css(key: string | CSSAttrs, value?: string, priority?: string): string | HElement {
         const { style } = this._
         if (typeof key === 'string') {
             if (value) {
-                style.setProperty(key, value)
+                let priority
+                if (value.includes(' !important')) {
+                    value = value.replaceAll(' !important', '')
+                    priority = 'important'
+                }
+                style.setProperty(key, value, priority)
                 return this
             } else {
                 return style.getPropertyValue(key)
@@ -132,14 +137,13 @@ export default class HElement {
     }
 
     setStyles(props: CSSAttrs): HElement {
-        const { style } = this._
         for (const prop in props) {
             let value = props[prop as keyof CSSAttrs]
             if (typeof value === 'number') {
                 value = value + 'px'
             }
             if (value !== undefined) {
-                style.setProperty(camelCaseToKebabCase(prop), String(value))
+                this.css(camelCaseToKebabCase(prop), String(value))
             }
         }
         return this
