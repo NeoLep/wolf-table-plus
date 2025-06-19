@@ -468,7 +468,7 @@ export default class Printer {
                     }
                 })
 
-                tableElement.style.width = `${tableWidth}px`
+                tableElement.style.width = `max-content`
 
                 const transformY: { y: number; height: number }[] = [{ y: 0, height: 0 }]
                 const trDoms = tableElement.querySelectorAll('tr')
@@ -495,12 +495,12 @@ export default class Printer {
                 transformArrs.forEach((item, index) => {
                     const tableDom = tableElement.cloneNode(true) as HTMLElement
                     tableDom.style.position = 'absolute'
-                    tableDom.style.left = `${item.x * -1 + (item.x !== 0 ? 1 : 0)}px`
+                    tableDom.style.left = `${item.x * -1}px`
                     tableDom.style.top = `${item.y * -1}px`
                     const tableContainer = h('div')
                     tableContainer.setStyles({
                         position: 'relative',
-                        width: `${item.width + (item.x !== 0 ? +1 : 0)}px`,
+                        width: `${item.width + 1}px`,
                         height: `${item.height + 1}px`,
                         boxSizing: 'border-box',
                         overflow: 'hidden',
