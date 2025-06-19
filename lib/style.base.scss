@@ -69,3 +69,13 @@ $text-color-regular: #606266;
 $text-color-secondary: #909399;
 $text-color-placeholder: #757575;
 $text-color-disabled: #c0c4cc;
+
+.border-base {
+  border: $border-style;
+}
+.border-darker {
+  border: $border-darker;
+}
+.color-info {
+  color: $color-info;
+}

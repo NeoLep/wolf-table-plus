@@ -283,3 +283,20 @@
         }
     }
 }
+
+.#{$style-prefix}-custom-input-number {
+    input {
+        border: $border-darker;
+    }
+    input[type="number"]::-webkit-outer-spin-button,  
+    input[type="number"]::-webkit-inner-spin-button {  
+      -webkit-appearance: none;  
+      margin: 0;  
+    }  
+    
+    /* Firefox */  
+    input[type="number"] { 
+      appearance: none;  
+      -moz-appearance: textfield;  
+    }
+}

@@ -2,7 +2,7 @@ import Button, { Icon } from '../button'
 import { stylePrefix } from '../config'
 import HElement, { h } from '../element'
 
-class EventController {
+export class EventController {
     events: Record<string, Function[]> = {}
     constructor() {}
     add(name: string, callback: Function) {

@@ -1,7 +1,8 @@
 import Dialog from './dialog'
-import Table, { h } from '.'
+import Table, { h, HElement } from '.'
 import Button from './button'
-import Form, { FormItemInput, FormItemSelect } from './form'
+import { stylePrefix } from './config'
+import Form, { EventController, FormItem, FormItemSelect } from './form'
 import { isFirefox } from './utils/brower-checker'
 import { xy2expr } from './table-renderer'
 
@@ -27,6 +28,113 @@ const firstWordToUpper = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
+const defaultPadding = (): [number, number, number, number] => {
+    if (isFirefox()) {
+        return [12, 12, 12, 12]
+    } else {
+        return [10, 10, 10, 10]
+    }
+}
+class PaddingComponent extends FormItem {
+    configs = {}
+    carrier: HElement = h('div', [`${stylePrefix}-form-item--input`])
+
+    value = defaultPadding()
+
+    events = new EventController()
+
+    constructor(value?: [number, number, number, number]) {
+        super()
+        this._ = h('div', ['form-item--container', `${stylePrefix}-custom-input-number`])
+        this._.setStyles({
+            position: 'relative',
+            padding: '30px 60px',
+        })
+
+        const paperDom = h('div', ['paper-card', 'border-darker'])
+        paperDom._.innerHTML = '<span class="color-info" style="text-align: center">Page</span>'
+        paperDom.setStyles({
+            width: '100px',
+            height: '100px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto',
+        })
+
+        this._.append(paperDom)
+
+        for (let i = 0; i < 4; i++) {
+            const input = h('input', [`${stylePrefix}-form-item--input`])
+            input.setStyles({
+                position: 'absolute',
+                width: '40px',
+                textAlign: 'center',
+            })
+            input._.setAttribute('type', 'number')
+            input.value(this.value[i].toString())
+            input.on('blur', () => {
+                this.value[i] = Number(input.value())
+                if (this.value[i] < 0) {
+                    input.value('0')
+                    this.value[i] = 0
+                }
+                this.events.emit('change', [this.value, i])
+            })
+            if (i === 0) {
+                input.setStyles({
+                    top: 0,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                })
+                input.attr('placeholder', 'top')
+            } else if (i === 1) {
+                input.setStyles({
+                    top: '50%',
+                    right: 0,
+                    transform: 'translateY(-50%)',
+                })
+                input.attr('placeholder', 'right')
+            } else if (i === 2) {
+                input.setStyles({
+                    bottom: 0,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                })
+                input.attr('placeholder', 'bottom')
+            } else if (i === 3) {
+                input.setStyles({
+                    top: '50%',
+                    left: 0,
+                    transform: 'translateY(-50%)',
+                })
+                input.attr('placeholder', 'left')
+            }
+            this._.append(input)
+        }
+
+        this._.addCss(`${stylePrefix}-form-item--input_wrapper--suffix`)
+        this._.append(this.carrier)
+
+        if (value) {
+            this.setValue(value)
+        }
+        this.render()
+    }
+
+    setValue(value: typeof this.value): void {
+        this.value = value
+    }
+    getValue() {
+        return this.value
+    }
+
+    on(ename: string, callback: Function) {
+        this.events.add(ename, callback)
+    }
+
+    render = () => {}
+}
 export default class Printer {
     papers = Papers.map((paper) => {
         return {
@@ -48,9 +156,6 @@ export default class Printer {
         this.dialog = new Dialog([], {
             width: 'fit-content',
             draggable: true,
-            onBeforeClose: () => {
-                console.log('onBeforeClose')
-            },
         })
         this.dialog.containerHeader.hide()
         this.dialog.containerFooter.hide()
@@ -64,7 +169,6 @@ export default class Printer {
         }
         return r
     }
-
     getDeviceDPI() {
         const tempDiv = document.createElement('div')
         tempDiv.style.width = '1in'
@@ -95,7 +199,7 @@ export default class Printer {
         const formValue = {
             renderMode: 'normal' as 'normal' | 'compat',
             paper: this.currentPaper?.code,
-            padding: [10, 10, 10, 10],
+            padding: defaultPadding(),
             direction: 'portrait' as 'portrait' | 'landscape',
         }
         const initForm = (fValue: typeof formValue) => {
@@ -141,6 +245,7 @@ export default class Printer {
                                 })
 
                                 comp.on('change', (value: string) => {
+                                    formValue.paper = value
                                     this.currentPaper = this.getPaperByCode(value)
                                     renderPaperArea()
                                 })
@@ -173,6 +278,21 @@ export default class Printer {
                                 return comp
                             })(),
                         },
+                        {
+                            label: '边距 (mm)',
+                            prop: 'padding',
+                            component: (() => {
+                                const pcomp = new PaddingComponent()
+                                pcomp.on(
+                                    'change',
+                                    (value: [number, number, number, number], index: number) => {
+                                        formValue.padding = value
+                                        renderPaperArea()
+                                    },
+                                )
+                                return pcomp
+                            })(),
+                        },
                     ],
                 },
                 fValue,
@@ -201,7 +321,6 @@ export default class Printer {
         })
         // paper
         const renderPaperArea = () => {
-            console.log('render Paper Area')
             paperArea._.innerHTML = ''
 
             // 获取对应的纸张尺寸
@@ -212,7 +331,7 @@ export default class Printer {
                 ;[paperHeight, paperWidth] = this.currentPaper!.size
             }
             console.log(
-                `paper is: ${formValue.paper}, width: ${paperWidth}, height: ${paperHeight}`,
+                `paper is: ${this.currentPaper?.code}, direction: ${formValue.direction}, width: ${paperWidth}, height: ${paperHeight}`,
             )
 
             const [paddingTop, paddingRight, paddingBottom, paddingLeft] = formValue.padding
@@ -220,7 +339,6 @@ export default class Printer {
             // toHtml
             const parser = new DOMParser()
             const ht = this.table.toHtml(`A1:${xy2expr(...this.table.getMaxArea())}`)
-            // console.log(ht)
             const dataHtml = parser.parseFromString(ht, 'text/html')
             const tableElement = dataHtml.body.firstChild as HTMLElement
 
@@ -229,13 +347,10 @@ export default class Printer {
                 paper.setStyles({
                     width: `${this.transferMMToPX(paperWidth)}px`,
                     height: `${this.transferMMToPX(paperHeight)}px`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    // paddingTop: `${this.transferMMToPX(paddingTop)}px`,
-                    // paddingRight: `${this.transferMMToPX(paddingRight)}px`,
-                    // paddingBottom: `${this.transferMMToPX(paddingBottom)}px`,
-                    // paddingLeft: `${this.transferMMToPX(paddingLeft)}px`,
+                    paddingTop: `${this.transferMMToPX(paddingTop)}px`,
+                    paddingRight: `${this.transferMMToPX(paddingRight)}px`,
+                    paddingBottom: `${this.transferMMToPX(paddingBottom)}px`,
+                    paddingLeft: `${this.transferMMToPX(paddingLeft)}px`,
                     boxSizing: 'border-box',
                     margin: '20px auto',
                     background: '#fff',
@@ -457,7 +572,6 @@ export default class Printer {
                 const item = list.item(i)
                 if (item?.firstChild) {
                     const n = item.firstChild.cloneNode(true) as HTMLElement
-                    console.log(n)
                     pushDoms.appendChild(n)
                 }
             }
