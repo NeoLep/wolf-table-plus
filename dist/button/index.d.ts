@@ -1,4 +1,4 @@
-import HElement from '../element';
+import HElement, { CSSAttrs } from '../element';
 export default class Button {
     _: HElement;
     configs: {
@@ -6,6 +6,7 @@ export default class Button {
         padding?: string;
         noneBorder?: boolean;
         onClick?: () => void;
+        style?: CSSAttrs;
     } | undefined;
     baseName: string | HElement;
     constructor(name: string | HElement, type?: 'default' | 'warning' | 'primary' | 'danger' | 'success' | 'info', configs?: typeof this.configs);

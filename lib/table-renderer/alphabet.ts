@@ -36,8 +36,8 @@ export function expr2xy(expr: string): [number, number] {
 }
 
 /** (col, row) => B10 */
-export function xy2expr(x: number, y: number) {
-    return `${stringAt(x)}${y + 1}`
+export function xy2expr(col: number, row: number) {
+    return `${stringAt(col)}${row + 1}`
 }
 
 export function expr2expr(expr: string, xn: number, yn: number) {

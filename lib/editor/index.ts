@@ -63,11 +63,11 @@ export default class Editor {
             this._visible = true
             this._rect = rect
             const { x, y, width, height } = rect
-            this._.css({
-                left: x - borderWidth / 2,
-                top: y - borderWidth / 2,
-                width: width - borderWidth,
-                height: height - borderWidth,
+            this._.setStyles({
+                left: `${x - borderWidth / 2}px`,
+                top: `${y - borderWidth / 2}px`,
+                width: `${width - borderWidth}px`,
+                height: `${height - borderWidth}px`,
             }).show()
         }
         return this

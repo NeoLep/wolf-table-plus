@@ -82,12 +82,12 @@ function resizeSize(editor: TextEditor) {
         const { width, height } = _textMeasure.rect()
         const minWidth = _rect.width - borderWidth
         if (width > minWidth) {
-            _.css({ width })
+            _.setStyles({ width: `${width}px` })
         }
         if (height > _rect.height && height <= maxHeight) {
-            _.css({ height })
+            _.setStyles({ height: `${height}px` })
         } else if (height < _rect.height) {
-            _.css({ height: _rect.height - borderWidth })
+            _.setStyles({ height: `${_rect.height - borderWidth}px` })
         }
     }
 }

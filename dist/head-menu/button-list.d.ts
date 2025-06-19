@@ -1,4 +1,5 @@
 import Divider from './buttons/divider';
+import PrintButton from './buttons/print';
 import UndoButton from './buttons/undo';
 import RedoButton from './buttons/redo';
 import PaintformatButton from './buttons/paintformat';
@@ -13,4 +14,4 @@ import Border from './buttons/border';
 import TextAlignButton from './buttons/text-align';
 import TextVerticalAlignButton from './buttons/text-vertical-align';
 import type Table from '..';
-export default function (table: Table): (Divider | UndoButton | RedoButton | PaintformatButton | ClearformatButton | ValueFormatButton | FontFamilyButton | FontSizeButton | FastOperateButton | TextColor | FillColor | Border | TextAlignButton | TextVerticalAlignButton)[];
+export default function (table: Table): (Divider | PrintButton | UndoButton | RedoButton | PaintformatButton | ClearformatButton | ValueFormatButton | FontFamilyButton | FontSizeButton | FastOperateButton | TextColor | FillColor | Border | TextAlignButton | TextVerticalAlignButton)[];

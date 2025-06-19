@@ -1,11 +1,11 @@
-export type CSSAttrs = {
-    left?: number;
-    top?: number;
-    width?: number;
-    height?: number;
-    position?: string;
-    [property: string]: unknown;
-};
+import type * as CSS from 'csstype';
+/**
+ * 将驼峰字符转换为中划线字符
+ * @param {string} str 需要转换的字符
+ * @returns 示例:TButtonTest1 => t-button-test-1
+ */
+export declare function camelCaseToKebabCase(str: string): string;
+export type CSSAttrs = Partial<CSS.Properties>;
 export default class HElement {
     _: HTMLElement;
     _data: Map<any, any>;
@@ -25,7 +25,8 @@ export default class HElement {
     removeCss(name: string): void;
     css(key: string): string;
     css(props: CSSAttrs): HElement;
-    css(key: string, value: string): HElement;
+    css(key: string, value: string, priority?: string): HElement;
+    setStyles(props: CSSAttrs): HElement;
     rect(): DOMRect;
     offset(): {
         x: number;
@@ -34,6 +35,7 @@ export default class HElement {
         height: number;
     };
     computedStyle(): CSSStyleDeclaration;
+    isShow(): boolean;
     show(flag?: boolean): this;
     hide(): this;
     scrollx(): number;

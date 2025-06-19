@@ -15,7 +15,7 @@ export default class Events {
     mousemoveHandler(evt: MouseEvent): void;
     wheelHandler(evt: WheelEvent): void;
     canInput(evt: KeyboardEvent): boolean;
-    eventTrigger(action: 'copy' | 'cut' | 'undo' | 'redo' | 'clearCopy' | 'insertRow' | 'insertCol' | 'deleteRow' | 'deleteCol' | 'clearBorder' | 'merge' | 'freeze' | 'paintFormat'): void;
+    eventTrigger(action: 'print' | 'copy' | 'cut' | 'undo' | 'redo' | 'clearCopy' | 'insertRow' | 'insertCol' | 'deleteRow' | 'deleteCol' | 'clearBorder' | 'merge' | 'freeze' | 'paintFormat'): void;
     eventTrigger(action: 'paste', onlyCopyText?: boolean): void;
     eventTrigger(action: 'setStyle', style: Partial<Style>): void;
     eventTrigger(action: 'fastStyle', type: 'bold' | 'underline' | 'italic' | 'strikethrough' | 'textwrap'): void;

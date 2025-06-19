@@ -32,7 +32,7 @@ export function toHtml(t: Table, from: string) {
         if (lineStyle === 'dashed' || lineStyle === 'dotted') {
             return `1px ${lineStyle} ${color}`
         } else {
-            return `${lineStyle === 'thick' ? 3 : lineStyle === 'medium' ? 2 : 1}px solid ${color}`
+            return `${lineStyle === 'thick' ? 3 : lineStyle === 'medium' ? 2 : 1}pt solid ${color}`
         }
     }
     const cellIndexes = new Map()
@@ -71,7 +71,7 @@ export function toHtml(t: Table, from: string) {
                 if (borderNames.length > 0) {
                     cellIndexes.set(
                         `${r}_${c}`,
-                        borderNames.map((it) => `${it}:${borderValue};`).join(''),
+                        borderNames.map((it) => `${it}:${borderValue} !important;`).join(''),
                     )
                 }
             })
@@ -124,7 +124,7 @@ export function toHtml(t: Table, from: string) {
                     cssStyleStr += style2css(t.style(cell.style, true))
                 }
 
-                htmlStr += `style="${cssStyleStr ? `${cssStyleStr};` : ''} position: relative;"`
+                htmlStr += `style="${cssStyleStr ? `${cssStyleStr};` : ''} position: relative; padding: 0 5px;"`
 
                 const cellType = cellTypeGetter(cell)
                 htmlStr += Renders.use().getRender(cellType).toHtml(t, cell, r, c, htmlStr)

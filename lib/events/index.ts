@@ -185,6 +185,7 @@ export default class Events {
 
     eventTrigger(
         action:
+            | 'print'
             | 'copy'
             | 'cut'
             | 'undo'
@@ -241,6 +242,8 @@ export default class Events {
                 this.table.data(data)
                 this.table.render()
             })
+        } else if (action === 'print') {
+            this.table._printer.print()
         } else if (action === 'setStyle') {
             selector.setCellStyle(this.table, (args[0] as Partial<Style>) || {})
         } else if (action === 'fastStyle') {
@@ -330,6 +333,8 @@ export default class Events {
             this.eventTrigger('clearCell', shiftKey ? 'style' : 'value')
         } else if (code === 'Delete') {
             this.eventTrigger('clearCell', 'cell')
+        } else if (code === 'KeyP' && (ctrlKey || metaKey)) {
+            this.eventTrigger('print')
         } else if (this.canInput(evt)) {
             // editor
             editor.reset(this.table, evt.key)

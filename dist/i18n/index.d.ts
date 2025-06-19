@@ -76,10 +76,6 @@ export default class I18n {
             };
         };
         zh: {
-            common: {
-                ok: string;
-                cancel: string;
-            };
             cut: string;
             copy: string;
             paste: string;
@@ -87,6 +83,7 @@ export default class I18n {
             redo: string;
             onlyPasteValue: string;
             delete: string;
+            printSheet: string;
             paintformat: string;
             clearformat: string;
             valueformat: string;
@@ -119,6 +116,10 @@ export default class I18n {
             insert_pictures: string;
             dataValidator: string;
             selectorOptions: string;
+            common: {
+                ok: string;
+                cancel: string;
+            };
             formats: {
                 normal: string;
                 text: string;
@@ -148,6 +149,10 @@ export default class I18n {
                 placeholder: string;
                 unselectRange: string;
                 formatError: string;
+            };
+            print: {
+                letter: string;
+                legal: string;
             };
         };
     };

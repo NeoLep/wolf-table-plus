@@ -1,8 +1,4 @@
 declare const _default: {
-    common: {
-        ok: string;
-        cancel: string;
-    };
     cut: string;
     copy: string;
     paste: string;
@@ -10,6 +6,7 @@ declare const _default: {
     redo: string;
     onlyPasteValue: string;
     delete: string;
+    printSheet: string;
     paintformat: string;
     clearformat: string;
     valueformat: string;
@@ -42,6 +39,10 @@ declare const _default: {
     insert_pictures: string;
     dataValidator: string;
     selectorOptions: string;
+    common: {
+        ok: string;
+        cancel: string;
+    };
     formats: {
         normal: string;
         text: string;
@@ -71,6 +72,10 @@ declare const _default: {
         placeholder: string;
         unselectRange: string;
         formatError: string;
+    };
+    print: {
+        letter: string;
+        legal: string;
     };
 };
 export default _default;

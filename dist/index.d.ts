@@ -16,6 +16,7 @@ import type Selector from './selector';
 import type Resizer from './resizer';
 import type Scrollbar from './scrollbar';
 import Renders from './table-renderer/renders';
+import Printer from './index.printer';
 export type TableRendererOptions = {
     style?: Partial<Style>;
     headerStyle?: Partial<Style>;
@@ -74,6 +75,7 @@ export default class Table {
     _history: History;
     _contextMenu: ContextMenu;
     _i18n: I18n;
+    _printer: Printer;
     constructor(element: HTMLElement | string, width: () => number, height: () => number, options?: TableOptions);
     contentRect(): Rect;
     container(): HElement;
@@ -149,6 +151,8 @@ export default class Table {
      * @param from A1:H12
      */
     toHtml(from: string): string;
+    /** () => [col, row] */
+    getMaxArea(): readonly [number, number];
     toArrays(from: string): DataCellValue[][];
     onClick(handler: (cell: ViewportCell, evt: MouseEvent) => void): this;
     onContextmenu(handler: (cell: ViewportCell, evt: MouseEvent) => void): this;

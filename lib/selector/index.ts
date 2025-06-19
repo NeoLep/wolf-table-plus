@@ -30,11 +30,11 @@ class SelectArea {
 
     rect(value: Rect) {
         this._rect = value
-        this._.css({
-            left: value.x,
-            top: value.y,
-            width: value.width,
-            height: value.height,
+        this._.setStyles({
+            left: `${value.x}px`,
+            top: `${value.y}px`,
+            width: `${value.width}px`,
+            height: `${value.height}px`,
         })
         return this
     }
@@ -88,7 +88,7 @@ export default class Selector {
         if (this._shadowInputInterval) {
             clearTimeout(this._shadowInputInterval)
         }
-        this._shadowInputInterval = setTimeout(() => {
+        this._shadowInputInterval = window.setTimeout(() => {
             this._shadowInput._.focus()
             this._shadowInputInterval = null
         }, 30)

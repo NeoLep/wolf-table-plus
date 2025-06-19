@@ -424,7 +424,7 @@ function bindMousemove(
                     const deltax = e.x - cachexy[0]
                     const deltay = e.y - cachexy[1]
                     if (deltax >= 0 && deltay >= 0) {
-                        timer = setInterval(() => {
+                        timer = window.setInterval(() => {
                             const cRange = changedRange(_selector)
                             if (cRange) {
                                 const { endRow, endCol } = cRange

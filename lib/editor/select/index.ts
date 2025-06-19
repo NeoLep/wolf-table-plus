@@ -101,8 +101,8 @@ export default class SelectEditor extends Editor {
                 }
 
                 this._.css({
-                    left,
-                    top,
+                    left: left + 'px',
+                    top: top + 'px',
                 })
             }, 0)
         }

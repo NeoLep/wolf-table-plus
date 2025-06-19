@@ -4,6 +4,7 @@ import { Cell, CellBase, CellText } from '../lib/table-renderer/renders'
 import { cellValueGetter } from '../lib/table-renderer/cell-render'
 import { fontString, textLine, textx, texty } from '../lib/table-renderer/renders/text'
 import { TextLineType } from '../lib/table-renderer'
+import hotkeys from 'hotkeys-js'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div style="width: 100%; height: 100%" id="container">
@@ -131,10 +132,12 @@ Renders.use().registRender({
     },
 })
 
-const container = document.querySelector('#container')
-if (container) {
+const container = document.querySelector('#container') as HTMLElement
+
+const init = () => {
+    if (!container) return
     const wt = WolfTablePlus.create(
-        '#container',
+        container,
         () => container.clientWidth,
         () => container.clientHeight,
         {
@@ -174,9 +177,22 @@ if (container) {
     //     color: 'red',
     // })
 
-    wt.cell(2, 2, { type: 'select', value: 'CHN', options: ['CHN', 'USA"', 'BRA'] })
-        .cell(2, 3, { type: 'select', value: 'CHN', options: ['A', 'B', 'C'] })
-        .render()
+    const d = localStorage.getItem('wtData')
+    if (d) {
+        wt.data(JSON.parse(d)).render()
+    }
+
+    // wt.cell(0, 0, 'A1')
+    // wt.cell(9, 4, 'E10')
+    //     .cell(2, 2, { type: 'select', value: 'CHN', options: ['CHN', 'USA"', 'BRA'] })
+    //     .cell(2, 3, { type: 'select', value: 'CHN', options: ['A', 'B', 'C'] })
+    //     .render()
     //     .cell(2, 3, { type: 'datasource', value: 'USA' })
     //     .render()
+
+    hotkeys('ctrl+s', () => {
+        localStorage.setItem('wtData', JSON.stringify(wt.data()))
+    })
 }
+
+init()

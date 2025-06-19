@@ -73,16 +73,20 @@ export default class ValidatorSelectDialog {
                             const button = new Button(new Icon('border-all')._, 'default', {
                                 noneBorder: true,
                                 padding: '0',
+                                style: {
+                                    width: '31px',
+                                    height: '30px',
+                                },
                                 onClick: () => {
                                     this.dialog.close()
                                     this.cellAreaDialog.show('')
                                 },
                             })
-                            button._.css('height', '100%')
                             const res = new FormItemInput('', {
                                 placeholder: this.t('validators.pleaseInputCellRange'),
                                 suffix: button._,
                             })
+                            console.log(res._.css('padding-right', '0'))
                             return res
                         })(),
                         rules: {
@@ -256,7 +260,7 @@ class CellAreaSelectDialog {
                                 fo.validate()
                                     .then(() => {
                                         if (this.onSubmitCallback) {
-                                            this.onSubmitCallback(this.input.getValue())
+                                            this.onSubmitCallback(this.input.getValue() as string)
                                         }
                                         this.dialog.close()
                                     })
@@ -348,7 +352,7 @@ class ValueOptionsInput extends FormItem {
         this.editInputElement.on('keyup', (evt) => {
             const e = evt as KeyboardEvent
             if (e.key === 'Enter') {
-                const value = this.editInputElement.getValue()
+                const value = this.editInputElement.getValue() as string
                 if (value) {
                     if (!this.options.includes(value)) {
                         this.options.push(value)

@@ -56,7 +56,7 @@ export const imageToHtml: ToHtmlFuncType = (t, cell, row, col, htmlStr): string 
     if (cell instanceof Object && cell.type === 'image') {
         let src = cell.value
         if ((cell as CellImages).valueType === 'local') src = Store.use().getPicture(src || '')
-        return `> <img src="${src}" md5="${(cell as CellImages).valueType === 'local' ? cell.value : ''}" value-type="${(cell as CellImages).valueType}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" /> </td>`
+        return `> <img src="${src}" md5="${(cell as CellImages).valueType === 'local' ? cell.value : ''}" value-type="${(cell as CellImages).valueType}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 2px); height: calc(100% - 2px);" /> </td>`
     } else {
         return `${(cell as CellText)?.value || JSON.stringify(cell)} </td>`
     }
