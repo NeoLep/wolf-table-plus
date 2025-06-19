@@ -3,7 +3,7 @@ export declare function indexAt(str: string): number;
 /** (B10 => [col, row]) */
 export declare function expr2xy(expr: string): [number, number];
 /** (col, row) => B10 */
-export declare function xy2expr(x: number, y: number): string;
+export declare function xy2expr(col: number, row: number): string;
 export declare function expr2expr(expr: string, xn: number, yn: number): string;
 export declare function validExpr(expr: string): boolean;
 declare const _default: {

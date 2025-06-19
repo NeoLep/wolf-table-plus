@@ -72,7 +72,7 @@ export function throttle(fn: Function, delay: number) {
     let timer: number | null = null
     return (...args: unknown[]) => {
         if (!timer) {
-            timer = setTimeout(() => {
+            timer = window.setTimeout(() => {
                 fn.apply(null, ...args)
                 timer = null
             }, delay || 0)

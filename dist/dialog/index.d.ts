@@ -14,11 +14,12 @@ export default class Dialog {
         delayGenerate?: boolean;
         title?: string;
         width?: string;
+        height?: string;
         disableMask?: boolean;
         maskColor?: string;
         closeOnClickMask?: boolean;
         draggable?: boolean;
-        onBeforeClose?: () => boolean | undefined;
+        onBeforeClose?: () => boolean | undefined | void;
     };
     constructor(content: HElement | HElement[], config?: typeof this.conf);
     initContiner(): void;

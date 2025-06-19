@@ -335,7 +335,7 @@ export default class ContextMenu {
                     }
                 })
                 itemEle.on('mouseleave', () => {
-                    interval = setTimeout(() => {
+                    interval = window.setTimeout(() => {
                         content.css('display', 'none')
                     }, 100)
                 })

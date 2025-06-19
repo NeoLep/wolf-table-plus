@@ -24,7 +24,12 @@ export default class Overlayer {
         if (rect) {
             this._areaRects[index] = rect
             const { x, y, height, width } = rect
-            this._areas[index].css({ left: x, top: y, width, height })
+            this._areas[index].setStyles({
+                left: `${x}px`,
+                top: `${y}px`,
+                width: `${width}px`,
+                height: `${height}px`,
+            })
             return this
         }
         return this._areas[index]
@@ -35,7 +40,12 @@ export default class Overlayer {
     headerArea(index: number, rect?: Rect): HElement | Overlayer {
         if (rect) {
             const { x, y, height, width } = rect
-            this._headerAreas[index].css({ left: x, top: y, width, height })
+            this._headerAreas[index].setStyles({
+                left: `${x}px`,
+                top: `${y}px`,
+                width: `${width}px`,
+                height: `${height}px`,
+            })
         }
         return this._headerAreas[index]
     }

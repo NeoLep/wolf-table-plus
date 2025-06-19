@@ -47,7 +47,7 @@ export default class BaseButtons {
             const delayTime = typeof tooltip === 'string' ? undefined : tooltip.delay
             this._.on('mouseenter', () => {
                 if (interval) clearTimeout(interval)
-                interval = setTimeout(() => {
+                interval = window.setTimeout(() => {
                     this._tooltip?.show()
                 }, delayTime ?? 500)
             })
