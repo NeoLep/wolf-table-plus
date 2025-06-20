@@ -150,12 +150,22 @@ export default class Printer {
     table: Table
     dialog: Dialog
 
+    formValue = {
+        renderMode: 'normal' as 'normal' | 'compat',
+        paper: 'A4',
+        padding: defaultPadding(),
+        direction: 'portrait' as 'portrait' | 'landscape',
+    }
+
     constructor(table: Table) {
         this.table = table
 
         this.dialog = new Dialog([], {
             width: 'fit-content',
             draggable: true,
+            onBeforeClose: () => {
+                this.table.render()
+            },
         })
         this.dialog.containerHeader.hide()
         this.dialog.containerFooter.hide()
@@ -185,6 +195,28 @@ export default class Printer {
         return (px * 25.4) / this.dpi
     }
 
+    getCurrentPaperInfo() {
+        if (!this.currentPaper) return undefined
+        else {
+            // 获取对应的纸张尺寸
+            let paperWidth, paperHeight
+            if (this.formValue.direction === 'portrait') {
+                ;[paperWidth, paperHeight] = this.currentPaper!.size
+            } else {
+                ;[paperHeight, paperWidth] = this.currentPaper!.size
+            }
+            const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.formValue.padding
+            const innerWidth = this.transferMMToPX(paperWidth - paddingLeft - paddingRight)
+            const innerHeight = this.transferMMToPX(paperHeight - paddingTop - paddingBottom)
+
+            return {
+                direction: this.formValue.direction,
+                width: innerWidth,
+                height: innerHeight,
+            }
+        }
+    }
+
     // transform move method
     renderPapaer() {
         if (!this.currentPaper) return
@@ -196,13 +228,9 @@ export default class Printer {
 
         this.dialog.containerBody.css('height', '100%')
 
-        const formValue = {
-            renderMode: 'normal' as 'normal' | 'compat',
-            paper: this.currentPaper?.code,
-            padding: defaultPadding(),
-            direction: 'portrait' as 'portrait' | 'landscape',
-        }
-        const initForm = (fValue: typeof formValue) => {
+        this.formValue.paper = this.currentPaper.code
+
+        const initForm = (fValue: typeof this.formValue) => {
             const form = new Form(
                 {
                     fields: [
@@ -224,10 +252,13 @@ export default class Printer {
                                         },
                                     ],
                                 })
-                                comp.on('change', (value: (typeof formValue)['renderMode']) => {
-                                    formValue.renderMode = value
-                                    renderPaperArea()
-                                })
+                                comp.on(
+                                    'change',
+                                    (value: (typeof this.formValue)['renderMode']) => {
+                                        this.formValue.renderMode = value
+                                        renderPaperArea()
+                                    },
+                                )
                                 return comp
                             })(),
                         },
@@ -245,7 +276,7 @@ export default class Printer {
                                 })
 
                                 comp.on('change', (value: string) => {
-                                    formValue.paper = value
+                                    this.formValue.paper = value
                                     this.currentPaper = this.getPaperByCode(value)
                                     renderPaperArea()
                                 })
@@ -272,7 +303,7 @@ export default class Printer {
                                 })
 
                                 comp.on('change', (value: 'portrait' | 'landscape') => {
-                                    formValue.direction = value
+                                    this.formValue.direction = value
                                     renderPaperArea()
                                 })
                                 return comp
@@ -286,7 +317,7 @@ export default class Printer {
                                 pcomp.on(
                                     'change',
                                     (value: [number, number, number, number], index: number) => {
-                                        formValue.padding = value
+                                        this.formValue.padding = value
                                         renderPaperArea()
                                     },
                                 )
@@ -303,7 +334,7 @@ export default class Printer {
             })
             return form
         }
-        const form = initForm(formValue)
+        const form = initForm(this.formValue)
 
         const printButton = new Button(this.table._i18n.t('printSheet'), 'primary')
         const cancelButton = new Button(this.table._i18n.t('common.cancel'), 'default')
@@ -325,16 +356,16 @@ export default class Printer {
 
             // 获取对应的纸张尺寸
             let paperWidth, paperHeight
-            if (formValue.direction === 'portrait') {
+            if (this.formValue.direction === 'portrait') {
                 ;[paperWidth, paperHeight] = this.currentPaper!.size
             } else {
                 ;[paperHeight, paperWidth] = this.currentPaper!.size
             }
             console.log(
-                `paper is: ${this.currentPaper?.code}, direction: ${formValue.direction}, width: ${paperWidth}, height: ${paperHeight}`,
+                `paper is: ${this.currentPaper?.code}, direction: ${this.formValue.direction}, width: ${paperWidth}, height: ${paperHeight}`,
             )
 
-            const [paddingTop, paddingRight, paddingBottom, paddingLeft] = formValue.padding
+            const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.formValue.padding
 
             // toHtml
             const parser = new DOMParser()
@@ -517,7 +548,7 @@ export default class Printer {
             }
 
             // debug mode
-            if (formValue.renderMode === 'compat') {
+            if (this.formValue.renderMode === 'compat') {
                 transformRenderType()
             } else {
                 baseRenderType()
@@ -576,8 +607,8 @@ export default class Printer {
                 }
             }
             this.printDOM(pushDoms, {
-                direction: formValue.direction,
-                paper: formValue.paper,
+                direction: this.formValue.direction,
+                paper: this.formValue.paper,
             })
         })
 

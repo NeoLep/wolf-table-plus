@@ -44,10 +44,19 @@ export function cellBorderRender(
             if (autoAlign) {
                 offset = lineWidth / 2
             }
+
+            let lineRectsArr: [number, number, number, number]
+            if (lineWidth === 1) {
+                lineRectsArr = lineRects(index, offset).map(
+                    (n) => (n += 0.5),
+                ) as typeof lineRectsArr
+            } else {
+                lineRectsArr = lineRects(index, offset)
+            }
             canvas
                 .prop({ strokeStyle: it[1], lineWidth })
                 .setLineDash(lineDash)
-                .line(...lineRects(index, offset))
+                .line(...lineRectsArr)
         }
     })
     canvas.restore()

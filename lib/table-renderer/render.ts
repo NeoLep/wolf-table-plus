@@ -19,6 +19,7 @@ import type {
 } from '.'
 import type TableRenderer from '.'
 import { Cell } from './renders'
+import { colWidth } from '../data'
 
 function renderLines(canvas: Canvas, { width, color }: Gridline, cb: () => void) {
     if (width > 0) {
@@ -33,6 +34,8 @@ function renderLines(canvas: Canvas, { width, color }: Gridline, cb: () => void)
 
 function renderCellGridline(canvas: Canvas, gridline: Gridline, { x, y, width, height }: Rect) {
     renderLines(canvas, gridline, () => {
+        width += 0.5
+        height += 0.5
         canvas.translate(x, y).line(width, 0, width, height).line(0, height, width, height)
     })
 }
@@ -111,6 +114,91 @@ function renderBorders(
             })
         })
     }
+}
+
+function renderPrintBorders(
+    canvas: Canvas,
+    area: Area,
+    printInfo: typeof TableRenderer.prototype._printInfo,
+) {
+    if (!printInfo) return
+    const { scrollX, scrollY } = printInfo
+    const innerWidth = printInfo.width
+    const innerHeight = printInfo.height
+
+    // console.log(`--- render print border --- [x: ${scrollX}, y: ${scrollY}]`)
+
+    // console.log('----- render print border -----')
+    // console.log(area.width, scrollX, innerWidth)
+
+    const xArrs = (() => {
+        const res = [] as number[]
+        let remainWidth = innerWidth
+        if (scrollX < innerWidth) {
+            remainWidth -= scrollX
+        } else {
+            remainWidth -= scrollX % innerWidth
+        }
+        area.colMap.forEach((col) => {
+            if (remainWidth < col.width) {
+                res.push(col.x)
+                remainWidth = innerWidth - col.width
+            } else {
+                remainWidth -= col.width
+            }
+        })
+        return res
+    })()
+
+    const yArrs = (() => {
+        const res = [] as number[]
+        let remainHeight = innerHeight
+        if (scrollY < innerHeight) {
+            remainHeight -= scrollY
+        } else {
+            remainHeight -= scrollY % innerHeight
+        }
+        area.rowMap.forEach((row) => {
+            if (remainHeight < row.height) {
+                res.push(row.y)
+                remainHeight = innerHeight - row.height
+            } else {
+                remainHeight -= row.height
+            }
+        })
+        return res
+    })()
+
+    xArrs.forEach((x) => {
+        cellBorderRender(
+            canvas,
+            {
+                x: area.x + x,
+                y: area.y,
+                width: 0,
+                height: area.height,
+            },
+            {
+                right: ['dashed', '#0288d1'],
+            },
+        )
+    })
+    yArrs.forEach((y) => {
+        cellBorderRender(
+            canvas,
+            {
+                x: area.x,
+                y: area.y + y,
+                width: area.width,
+                height: 0,
+            },
+            {
+                bottom: ['dashed', '#0288d1'],
+            },
+        )
+    })
+    // console.log(xArrs, yArrs)
+    // canvas.
 }
 
 function renderArea(
@@ -224,14 +312,24 @@ function renderArea(
     areaMergeRenderParams.forEach((it) => _render(...it))
 
     // render borders
+    // console.log('render borders')
     renderBorders(canvas, area, borders, areaMerges)
 
     canvas.restore()
 }
 
 export function render(renderer: TableRenderer) {
-    const { _width, _height, _target, _scale, _viewport, _freeze, _rowHeader, _colHeader } =
-        renderer
+    const {
+        _width,
+        _height,
+        _target,
+        _scale,
+        _viewport,
+        _freeze,
+        _rowHeader,
+        _colHeader,
+        _printInfo,
+    } = renderer
 
     if (_viewport) {
         const canvas = new Canvas(_target, _scale)
@@ -240,10 +338,10 @@ export function render(renderer: TableRenderer) {
         const [area1, area2, area3, area4] = _viewport.areas
         const [headerArea1, headerArea21, headerArea23, headerArea3] = _viewport.headerAreas
 
-        // render-4
+        // render-4 - body
         renderArea('body', canvas, area4, renderer)
 
-        // render-1
+        // render-1 - row-header
         renderArea('body', canvas, area1, renderer)
         renderArea('col-header', canvas, headerArea1, renderer)
 
@@ -282,5 +380,8 @@ export function render(renderer: TableRenderer) {
                 canvas.line(0, height, width, height).line(width, 0, width, height)
             })
         }
+
+        // render print area
+        renderPrintBorders(canvas, area4, _printInfo)
     }
 }

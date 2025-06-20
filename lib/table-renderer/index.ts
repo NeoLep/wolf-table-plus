@@ -179,6 +179,10 @@ export default class TableRenderer {
     // count of cols scrolled
     _scrollCols = 0
 
+    _printInfo:
+        | { scrollX: number; scrollY: number; width: number; height: number; direction: string }
+        | undefined = undefined
+
     /**
      * get row given rowIndex
      * @param {int} rowIndex
@@ -454,6 +458,11 @@ export default class TableRenderer {
             if (c) return c.hide === true ? 0 : c.width
         }
         return this._colWidth
+    }
+
+    printInfo(v: typeof this._printInfo) {
+        this._printInfo = v
+        return this
     }
 
     get viewport() {

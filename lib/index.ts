@@ -504,6 +504,20 @@ export default class Table {
         _renderer
             .scrollRows(_data.scroll[0]) // rows
             .scrollCols(_data.scroll[1]) // cols
+            .printInfo(
+                (() => {
+                    const r = this._printer.getCurrentPaperInfo()
+                    if (!r) return
+                    // console.log(`x scroll: ${_data.scroll[2]}, y scroll: ${_data.scroll[3]}`)
+                    return {
+                        scrollX: _data.scroll[2],
+                        scrollY: _data.scroll[3],
+                        width: r.width,
+                        height: r.height,
+                        direction: r.direction,
+                    }
+                })(),
+            )
             .merges(_data.merges)
             .freeze(_data.freeze || 'A1')
             .styles(_data.styles)
