@@ -123,6 +123,13 @@ export default class TableRenderer {
     _startCol: number;
     _scrollRows: number;
     _scrollCols: number;
+    _printInfo: {
+        scrollX: number;
+        scrollY: number;
+        width: number;
+        height: number;
+        direction: string;
+    } | undefined;
     /**
      * get row given rowIndex
      * @param {int} rowIndex
@@ -189,6 +196,7 @@ export default class TableRenderer {
     freezeGridline(value?: Partial<Gridline>): this;
     rowHeightAt(index: number): number;
     colWidthAt(index: number): number;
+    printInfo(v: typeof this._printInfo): this;
     get viewport(): Viewport | null;
     static create(container: string | HTMLCanvasElement, width: number, height: number): TableRenderer;
 }

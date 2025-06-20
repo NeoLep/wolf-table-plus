@@ -16,6 +16,12 @@ export default class Printer {
     dpi: number;
     table: Table;
     dialog: Dialog;
+    formValue: {
+        renderMode: "normal" | "compat";
+        paper: string;
+        padding: [number, number, number, number];
+        direction: "portrait" | "landscape";
+    };
     constructor(table: Table);
     getPaperByCode(code: string): {
         label: string;
@@ -25,6 +31,11 @@ export default class Printer {
     getDeviceDPI(): number;
     transferMMToPX(mm: number): number;
     transferPXToMM(px: number): number;
+    getCurrentPaperInfo(): {
+        direction: "portrait" | "landscape";
+        width: number;
+        height: number;
+    } | undefined;
     renderPapaer(): void;
     printDOM(element: HTMLElement, config: {
         direction: 'portrait' | 'landscape';
