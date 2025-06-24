@@ -238,8 +238,30 @@ export default class Table {
         return this._container
     }
 
-    resize() {
-        this._container.css({ height: `${this._height()}px`, width: `${this._width()}px` })
+    resize(conf?: { width?: (() => number) | number; height?: (() => number) | number }) {
+        if (conf?.width !== undefined) {
+            const width = (
+                typeof conf.width === 'function' ? conf.width : () => conf.width
+            ) as () => number
+            this._width = width
+        }
+        if (conf?.height !== undefined) {
+            const height = (
+                typeof conf.height === 'function' ? conf.height : () => conf.height
+            ) as () => number
+
+            this._Layer.css({
+                width: `${this._width()}px`,
+                height: `${this._height()}px`,
+            })
+
+            this._height = () => height() - (this._headMenu?.height || 0)
+        }
+
+        this._container.css({
+            height: `${this._height()}px`,
+            width: `${this._width()}px`,
+        })
         this._renderer.width(this._width())
         this._renderer.height(this._height())
         this.render()
