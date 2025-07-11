@@ -32,7 +32,7 @@ export function toHtml(t: Table, from: string) {
         if (lineStyle === 'dashed' || lineStyle === 'dotted') {
             return `1px ${lineStyle} ${color}`
         } else {
-            return `${lineStyle === 'thick' ? 3 : lineStyle === 'medium' ? 2 : 1}pt solid ${color}`
+            return `${lineStyle === 'thick' ? 3 : lineStyle === 'medium' ? 2 : 1}px solid ${color}`
         }
     }
     const cellIndexes = new Map()
