@@ -102,7 +102,13 @@ function clearCellValue(t: Table) {
 function clearCell(t: Table) {
     if (t._selector) {
         t.addHistory('clear selection cell')
-        const { _ranges } = t._selector
+        const { _ranges, currentRange } = t._selector
+        if (currentRange) {
+            const X1 = xy2expr(currentRange.startCol, currentRange.startRow)
+            const X2 = xy2expr(currentRange.endCol, currentRange.endRow)
+            t.clearBorder(`${X1}:${X2}`)
+        }
+
         _ranges.forEach((it) => {
             if (it) {
                 it.each((r, c) => {
@@ -591,6 +597,16 @@ function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean) {
             // 剪切模式记得清空复制区域与剪切板内容
             if (isCutted) {
                 if (table._selector?._copyRange) {
+                    const X1 = xy2expr(
+                        table._selector?._copyRange.startCol,
+                        table._selector?._copyRange.startRow,
+                    )
+                    const X2 = xy2expr(
+                        table._selector?._copyRange.endCol,
+                        table._selector?._copyRange.endRow,
+                    )
+                    table.clearBorder(`${X1}:${X2}`)
+
                     // 删除内容
                     table._selector?._copyRange?.each((r, c) => {
                         table._cells.remove(r, c)
