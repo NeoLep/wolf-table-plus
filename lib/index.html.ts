@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { xy2expr, Range } from './table-renderer'
 import { pt2px } from './helper'
 import Renders, { CellBase, cellTypeGetter } from './table-renderer/renders'
@@ -184,6 +185,7 @@ export function fromHtml(
                 let [rowspan, colspan] = [1, 1]
                 elementAttrValue(td, 'rowspan', (v) => (rowspan = Number.parseInt(v)))
                 elementAttrValue(td, 'colspan', (v) => (colspan = Number.parseInt(v)))
+
                 if (rowspan > 1 || colspan > 1) {
                     const range = Range.create(r, c, r + rowspan - 1, c + colspan - 1)
                     t.merge(range.toString())
@@ -195,52 +197,17 @@ export function fromHtml(
                 const nstyle: Partial<Style> = {}
                 elementStylePropValue(td, 'background-color', '', (v) => (nstyle.bgcolor = v))
                 elementStylePropValue(td, 'color', dstyle.color, (v) => (nstyle.color = v))
-                elementStylePropValue(
-                    td,
-                    'text-align',
-                    dstyle.align,
-                    (v) => (nstyle.align = v as Align),
-                )
-                elementStylePropValue(
-                    td,
-                    'vertical-align',
-                    dstyle.valign,
-                    (v) => (nstyle.valign = v as VerticalAlign),
-                )
-                elementStyleBooleanValue(
-                    td,
-                    'white-space',
-                    'normal',
-                    (_v) => (nstyle.textwrap = true),
-                )
-                elementStyleBooleanValue(
-                    td,
-                    'text-decoration',
-                    'underline',
-                    (_v) => (nstyle.underline = true),
-                )
-                elementStyleBooleanValue(
-                    td,
-                    'text-decoration',
-                    'line-through',
-                    (_v) => (nstyle.strikethrough = true),
-                )
+                elementStylePropValue(td, 'text-align', dstyle.align, (v) => (nstyle.align = v as Align))
+                elementStylePropValue(td,'vertical-align',dstyle.valign,(v) => (nstyle.valign = v as VerticalAlign))
+                elementStyleBooleanValue(td,'white-space','normal',(_v) => (nstyle.textwrap = true))
+                elementStyleBooleanValue(td,'text-decoration','underline',(_v) => (nstyle.underline = true))
+                elementStyleBooleanValue(td,'text-decoration','line-through',(_v) => (nstyle.strikethrough = true))
                 elementStyleBooleanValue(td, 'font-style', 'italic', (_v) => (nstyle.italic = true))
                 elementStylePropValue(td, 'font-weight', 'normal', (v) => {
                     if (v === 'bold' || Number.parseInt(v) >= 700) nstyle.bold = true
                 })
-                elementStylePropValue(
-                    td,
-                    'font-family',
-                    dstyle.fontFamily,
-                    (v) => (nstyle.fontFamily = v),
-                )
-                elementStylePropValue(
-                    td,
-                    'font-size',
-                    dstyle.fontSize,
-                    (v) => (nstyle.fontSize = Number.parseInt(v)),
-                )
+                elementStylePropValue(td,'font-family',dstyle.fontFamily,(v) => (nstyle.fontFamily = v))
+                elementStylePropValue(td,'font-size',dstyle.fontSize,(v) => (nstyle.fontSize = Number.parseInt(v)))
 
                 // border
                 // const border: Border = [];
@@ -267,6 +234,9 @@ export function fromHtml(
                 elementStylePropValue(td, 'border-width', '', (it) => borderxs.push(it))
                 elementStylePropValue(td, 'border-style', '', (it) => borderxs.push(it))
                 elementStylePropValue(td, 'border-color', '', (it) => borderxs.push(it))
+                // console.log(ref, td, borderxs)
+                // console.log([r, c], ref, [rowspan, colspan], td)
+
                 if (borderxs.length >= 3) {
                     curBorder = [ref, 'all', ...css2border(borderxs.join(' '))]
                     // t.addBorder(ref, 'all', ...css2border(borderxs.join(' ')));
@@ -290,6 +260,12 @@ export function fromHtml(
                     }
                 }
 
+                if (curBorder !== null) {
+                     if (colspan > 1 || rowspan > 1) {
+                        curBorder[0] = `${ref}:${xy2expr(c + (colspan || 1) - 1, r + (rowspan || 1) - 1)}`
+                     }
+                }
+
                 if (prevBorder === null) {
                     if (curBorder !== null) {
                         prevBorder = curBorder
@@ -308,6 +284,9 @@ export function fromHtml(
                     }
                 }
 
+                // console.log(ref, td, [rowspan, colspan], curBorder)
+
+
                 /**
                  * text render
                  * the cell value
@@ -322,6 +301,8 @@ export function fromHtml(
             if (prevBorder != null) {
                 borders.push(prevBorder)
             }
+
+            // console.log(borders)
 
             // auto merge borders in trs
             const prevBorders = borderss.at(-1)

@@ -193,6 +193,9 @@ const init = () => {
     hotkeys('ctrl+s', () => {
         localStorage.setItem('wtData', JSON.stringify(wt.data()))
     })
+    hotkeys('ctrl+d', () => {
+        console.log(wt.data())
+    })
 }
 
 init()
