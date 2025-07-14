@@ -214,10 +214,10 @@ export default class Table {
         // resize rect of content
         resizeContentRect(this)
 
+        if (options?.editable !== undefined) this._editable = options?.editable // editable
         if (options?.selectable) selector.init(this) // selector
         if (options?.scrollable) scrollbar.init(this) // scroll
         if (options?.resizable) resizer.init(this) // resizer
-        if (options?.editable) this._editable = true // editable
 
         this._copyable = options?.copyable || false
 
