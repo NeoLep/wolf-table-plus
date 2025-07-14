@@ -326,6 +326,14 @@ export function fromHtml(
             } else {
                 borderss.push(borders)
             }
+
+            elementStylePropValue(tr, 'height', '24px', (v) => {
+                const height = Number.parseInt(v.replaceAll('px', ''))
+                if (height !== 25 && height > (t._data.rows[rowIndex + toStartRow]?.height || 25)) {
+                  if (!t._data.rows[rowIndex + toStartRow]) t._data.rows[rowIndex + toStartRow] = { height: 25 }
+                  t._data.rows[rowIndex + toStartRow].height = height
+                }
+            })
         })
 
         // add border ...

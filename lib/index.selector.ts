@@ -109,9 +109,25 @@ function clearCell(t: Table) {
             t.clearBorder(`${X1}:${X2}`)
         }
 
+        const mergeIndex = (ref: string) => {
+            for (const index in t._data.merges) {
+                const it = t._data.merges[index]
+                const exp1 = it.split(':')[0]
+                if (ref === exp1) {
+                    return Number(index)
+                }
+            }
+            return -1
+        }
+
         _ranges.forEach((it) => {
             if (it) {
                 it.each((r, c) => {
+                    const ind = mergeIndex(xy2expr(c, r))
+                    console.log(ind)
+                    if (ind !== -1) {
+                        t._data.merges?.splice(ind, 1)
+                    }
                     t._cells.remove(r, c)
                 })
             }
