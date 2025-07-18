@@ -1,7 +1,7 @@
 import { borderWidth } from './config'
 import { Range, expr2xy, xy2expr } from './table-renderer'
 import { rangeUnoinMerges, stepColIndex, stepRowIndex } from './data'
-import { unmerge } from './data/merge'
+import { isMerged, unmerge } from './data/merge'
 import Selector from './selector'
 import scrollbar from './index.scrollbar'
 import { bindMousemoveAndMouseup } from './event'
@@ -13,6 +13,16 @@ import type { SupportFormats } from './data/format'
 import type { DataCell, DataCellValue } from './data'
 import type { Area, Border, Rect, Style } from './table-renderer'
 import type Table from '.'
+
+function isMergedExpr(t: Table, ref: string) {
+    for (const index in t._data.merges) {
+        const it = t._data.merges[index]
+        const exp1 = it.split(':')[0]
+        if (ref === exp1) {
+            return Number(index)
+        }
+    }
+}
 
 function init(t: Table) {
     t._selector = new Selector(!!t._editable).autofillTrigger(
@@ -76,6 +86,7 @@ function setCellValue(t: Table, value: DataCell) {
         _ranges.forEach((it) => {
             if (it) {
                 it.each((r, c) => {
+                    console.log(r, c)
                     t.cell(r, c, value)
                 })
             }
@@ -84,23 +95,11 @@ function setCellValue(t: Table, value: DataCell) {
     }
 }
 
-function clearCellValue(t: Table) {
-    if (t._selector) {
-        t.addHistory('clear selection value')
-        const { _ranges } = t._selector
-        _ranges.forEach((it) => {
-            if (it) {
-                it.each((r, c) => {
-                    t._cells.removeValue(r, c)
-                })
-            }
-        })
-        t.render()
-        t._canvas.focus()
-    }
+function clearCellValue(t: Table, ref?: string | Range[]) {
+    clearCell(t, ref, 'value')
 }
 
-function clearCell(t: Table, ref?: string | Range[]) {
+function clearCell(t: Table, ref?: string | Range[], type?: 'value' | 'style') {
     let X1 = ''
     let X2 = ''
     let _ranges: Range[] | undefined
@@ -139,17 +138,34 @@ function clearCell(t: Table, ref?: string | Range[]) {
     _ranges?.forEach((it) => {
         if (it) {
             it.each((r, c) => {
-                const ind = mergeIndex(xy2expr(c, r))
-                if (ind !== -1) {
-                    // 清除合并
-                    t._data.merges?.splice(ind, 1)
+                if (type === 'value') {
+                    const v = t._cells.get(r, c)
+                    if (v) {
+                        if (typeof v[2] !== 'object') {
+                            v[2] = undefined
+                        } else {
+                            v[2] = {
+                                type: 'text',
+                                style: v[2]?.style,
+                                value: undefined,
+                            }
+                        }
+                    }
+                } else {
+                    const ind = mergeIndex(xy2expr(c, r))
+                    if (ind !== -1) {
+                        // 清除合并
+                        t._data.merges?.splice(ind, 1)
+                    }
+                    t._cells.remove(r, c)
                 }
-                t._cells.remove(r, c)
             })
         }
     })
 
-    t.clearBorder(`${X1}:${X2}`)
+    if (!type) {
+        t.clearBorder(`${X1}:${X2}`)
+    }
     t.render()
     t._canvas.focus()
 }
@@ -754,7 +770,7 @@ function fastSetCellStyle(
 function fastClearCellStyle(table: Table) {
     if (table._selector) {
         table.addHistory('clear cell style fast')
-        const { _ranges } = table._selector
+        const { _ranges, currentRange } = table._selector
         _ranges.forEach((it) => {
             if (it) {
                 it.each((r, c) => {
