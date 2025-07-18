@@ -272,6 +272,20 @@ export default class Table {
         return this
     }
 
+    inMerged(ref: string) {
+        const [col, row] = expr2xy(ref)
+        for (const merge of this._data.merges) {
+            const mearr = merge.split(':')
+            if (mearr.length === 2) {
+                const [startCol, startRow] = expr2xy(mearr[0])
+                const [endCol, endRow] = expr2xy(mearr[1])
+                if (startCol <= col && endCol >= col && startRow <= row && endRow >= row) {
+                    return merge
+                }
+            }
+        }
+    }
+
     isMerged(): boolean
     isMerged(ref: string): boolean
     isMerged(ref?: string) {

@@ -86,8 +86,14 @@ function setCellValue(t: Table, value: DataCell) {
         _ranges.forEach((it) => {
             if (it) {
                 it.each((r, c) => {
-                    console.log(r, c)
-                    t.cell(r, c, value)
+                    const expr = xy2expr(c, r)
+                    const inMerged = t.inMerged(expr)
+                    const inMergedExprArr = inMerged?.split(':')
+                    if (inMerged && expr !== inMergedExprArr?.[0]) {
+                        // 合并了的单元格只有左上角的可以赋值
+                    } else {
+                        t.cell(r, c, value)
+                    }
                 })
             }
         })
