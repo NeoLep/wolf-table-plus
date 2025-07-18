@@ -765,6 +765,13 @@ function fastClearCellStyle(table: Table) {
                 })
             }
         })
+
+        if (table._selector.currentRange) {
+            const currentRange = table._selector.currentRange
+            const X1 = xy2expr(currentRange.startCol, currentRange.startRow)
+            const X2 = xy2expr(currentRange.endCol, currentRange.endRow)
+            table.clearBorder(`${X1}:${X2}`)
+        }
         table.render()
         table._canvas.focus()
     }
