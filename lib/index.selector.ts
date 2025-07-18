@@ -1,5 +1,5 @@
 import { borderWidth } from './config'
-import { expr2xy, Range, xy2expr } from './table-renderer'
+import { Range, expr2xy, xy2expr } from './table-renderer'
 import { rangeUnoinMerges, stepColIndex, stepRowIndex } from './data'
 import { unmerge } from './data/merge'
 import Selector from './selector'
@@ -7,12 +7,12 @@ import scrollbar from './index.scrollbar'
 import { bindMousemoveAndMouseup } from './event'
 import { getMaxRowIndexHasValue } from './data/row'
 import { getMaxColIndexHasValue } from './data/col'
-import { resizeContentRect, type MoveDirection } from '.'
+import { type MoveDirection, resizeContentRect } from '.'
+import type { Cell, CellText } from './table-renderer/renders'
 import type { SupportFormats } from './data/format'
 import type { DataCell, DataCellValue } from './data'
-import type { Rect, Area, Style, Border } from './table-renderer'
+import type { Area, Border, Rect, Style } from './table-renderer'
 import type Table from '.'
-import { Cell, CellText } from './table-renderer/renders'
 
 function init(t: Table) {
     t._selector = new Selector(!!t._editable).autofillTrigger(
@@ -69,6 +69,7 @@ function setCellValue(t: Table, value: DataCell) {
     const { _selector } = t
     if (_selector) {
         t.addHistory('set cell value')
+        // console.log('set cell value', value)
         _selector.clearCopy()
         const { _ranges } = _selector
         // console.log('ranges:', _ranges, value);
@@ -99,42 +100,58 @@ function clearCellValue(t: Table) {
     }
 }
 
-function clearCell(t: Table) {
-    if (t._selector) {
-        t.addHistory('clear selection cell')
-        const { _ranges, currentRange } = t._selector
-        if (currentRange) {
-            const X1 = xy2expr(currentRange.startCol, currentRange.startRow)
-            const X2 = xy2expr(currentRange.endCol, currentRange.endRow)
-            t.clearBorder(`${X1}:${X2}`)
-        }
+function clearCell(t: Table, ref?: string | Range[]) {
+    let X1 = ''
+    let X2 = ''
+    let _ranges: Range[] | undefined
 
-        const mergeIndex = (ref: string) => {
-            for (const index in t._data.merges) {
-                const it = t._data.merges[index]
-                const exp1 = it.split(':')[0]
-                if (ref === exp1) {
-                    return Number(index)
-                }
+    // 查找单元格是否被合并
+    const mergeIndex = (ref: string) => {
+        for (const index in t._data.merges) {
+            const it = t._data.merges[index]
+            const exp1 = it.split(':')[0]
+            if (ref === exp1) {
+                return Number(index)
             }
-            return -1
         }
-
-        _ranges.forEach((it) => {
-            if (it) {
-                it.each((r, c) => {
-                    const ind = mergeIndex(xy2expr(c, r))
-                    console.log(ind)
-                    if (ind !== -1) {
-                        t._data.merges?.splice(ind, 1)
-                    }
-                    t._cells.remove(r, c)
-                })
-            }
-        })
-        t.render()
-        t._canvas.focus()
+        return -1
     }
+    if (ref) {
+        if (typeof ref === 'string') {
+            ;[X1, X2] = ref.split(':')
+            if (!X2) X2 = X1
+            _ranges = [new Range(...expr2xy(X1), ...expr2xy(X2))]
+        } else {
+            _ranges = ref
+            X1 = xy2expr(_ranges[0].startCol, _ranges[0].startRow)
+            X2 = xy2expr(_ranges[0].endCol, _ranges[0].endRow)
+        }
+    } else if (t._selector) {
+        t.addHistory('clear selection cell')
+        if (t._selector.currentRange) {
+            X1 = xy2expr(t._selector.currentRange.startCol, t._selector.currentRange.startRow)
+            X2 = xy2expr(t._selector.currentRange.endCol, t._selector.currentRange.endRow)
+        }
+        _ranges = t._selector._ranges
+    }
+
+    // 遍历 range
+    _ranges?.forEach((it) => {
+        if (it) {
+            it.each((r, c) => {
+                const ind = mergeIndex(xy2expr(c, r))
+                if (ind !== -1) {
+                    // 清除合并
+                    t._data.merges?.splice(ind, 1)
+                }
+                t._cells.remove(r, c)
+            })
+        }
+    })
+
+    t.clearBorder(`${X1}:${X2}`)
+    t.render()
+    t._canvas.focus()
 }
 
 /** r,c is in the selected region */
@@ -167,6 +184,7 @@ function addRange(t: Table, r: number, c: number, clear: boolean) {
             .focus(r, c, mergedRange)
             .addRange(_selector._placement === 'body' ? mergedRange : range, clear)
         t._emitter.emit('selectorMove', [r, c])
+        t._emitter.emit('selected')
     }
 }
 
@@ -176,6 +194,7 @@ function unionRange(t: Table, r: number, c: number) {
         _selector.move(r, c).updateLastRange((focusRange) => {
             const res = rangeUnoinMerges(_data, focusRange.union(Range.create(r, c)))
             t._emitter.emit('updateFocusRange', res)
+            t._emitter.emit('selected')
             return res
         })
     }
@@ -388,6 +407,8 @@ function move(t: Table, reselect: boolean, direction: MoveDirection, step?: numb
             scrollbar.autoMove(t, _selector.currentRange, reselect ? undefined : oldCurrentRange)
 
             t._selector?._shadowInputFocus()
+            t._emitter.emit('select-move', _selector.currentRange)
+
             reset(t)
         }
     }
@@ -430,7 +451,7 @@ function bindMousemove(
                 const c1 = _renderer.viewport?.cellAt(x1, y1)
                 if (c1) {
                     const { row, col } = c1
-                    if (row != cache.row || col !== cache.col) {
+                    if (row !== cache.row || col !== cache.col) {
                         moveChange(row, col)
                         if (_placement === 'body') {
                             scrollbar.autoMove(t, changedRange(_selector), oldCurrentRange)
@@ -488,13 +509,17 @@ function showCopy(t: Table) {
 
 function clearCopy(t: Table) {
     if (t._selector) {
-        navigator.clipboard
-            .write([
-                new ClipboardItem({
-                    'text/plain': new Blob([''], { type: 'text/plain' }),
-                }),
-            ])
-            .then()
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard
+                .write([
+                    new ClipboardItem({
+                        'text/plain': new Blob([''], { type: 'text/plain' }),
+                    }),
+                ])
+                .then()
+        } else {
+            localStorage.removeItem('wtClipboard')
+        }
         t._selector.clearCopy()
         reset(t)
     }
@@ -580,24 +605,37 @@ function copyValue(table: Table) {
         const range = _selector.currentRange
         if (range) {
             showCopy(table)
-            ;['text/plain', 'text/html'].forEach((type) => {
+            if (navigator.clipboard && window.isSecureContext) {
+                ;['text/plain', 'text/html'].forEach((type) => {
+                    const from = range.toString()
+                    const text =
+                        type === 'text/html' ? table.toHtml(from) : toClipboardTextFrom(table, from)
+                    items[type] = new Blob([text], { type })
+                })
+                navigator.clipboard.write([new ClipboardItem(items)]).then()
+            } else {
+                console.warn('navigator.clipboard is not supported')
                 const from = range.toString()
-                const text =
-                    type === 'text/html' ? table.toHtml(from) : toClipboardTextFrom(table, from)
-                items[type] = new Blob([text], { type })
-            })
-            navigator.clipboard.write([new ClipboardItem(items)]).then()
-            // () => console.log('clipboard has writed success'),
-            // (e) => console.log('clipboard has wirted failure:', e)
+                const html = table.toHtml(from)
+                const plain = toClipboardTextFrom(table, from)
+
+                localStorage.setItem(
+                    'wtClipboard',
+                    JSON.stringify({
+                        html,
+                        plain,
+                    }),
+                )
+            }
         }
     }
 }
 
-function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean) {
-    navigator.clipboard.read().then((clipboardItems) => {
+async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean) {
+    if (navigator.clipboard && window.isSecureContext) {
+        const clipboardItems = await navigator.clipboard.read()
         if (clipboardItems.length > 0) {
             table.addHistory('paste value')
-
             const item = clipboardItems[0]
             if (!onlyCopyText) {
                 onlyCopyText = !getClipboardText(item, 'text/html', (text) => {
@@ -609,32 +647,30 @@ function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean) {
                     table.fill(toArraysFromClipboardText(text)).render()
                 })
             }
-
-            // 剪切模式记得清空复制区域与剪切板内容
-            if (isCutted) {
-                if (table._selector?._copyRange) {
-                    const X1 = xy2expr(
-                        table._selector?._copyRange.startCol,
-                        table._selector?._copyRange.startRow,
-                    )
-                    const X2 = xy2expr(
-                        table._selector?._copyRange.endCol,
-                        table._selector?._copyRange.endRow,
-                    )
-                    table.clearBorder(`${X1}:${X2}`)
-
-                    // 删除内容
-                    table._selector?._copyRange?.each((r, c) => {
-                        table._cells.remove(r, c)
-                    })
-                    // 取消合并
-                    unmerge(table._data, table._selector?._copyRange?.toString())
-                }
-                // 清除复制
-                clearCopy(table)
-            }
+        } else {
+            return
         }
-    })
+    } else {
+        const pValue = localStorage.getItem('wtClipboard')
+        if (!pValue) {
+            return
+        }
+        const { plain, html } = JSON.parse(pValue)
+        if (onlyCopyText) {
+            table.fill(toArraysFromClipboardText(plain)).render()
+        } else {
+            table.fill(html).render()
+        }
+    }
+
+    // 剪切模式记得清空复制区域与剪切板内容
+    if (isCutted) {
+        if (table._selector?._copyRange) {
+            clearCell(table, [table._selector?._copyRange]) // 删除内容
+        }
+        clearCopy(table) // 清除复制
+    }
+    table.addHistory('paste value')
 }
 
 function fastSetCellFormat(table: Table, format?: SupportFormats) {
@@ -1020,6 +1056,44 @@ function paintFormat(table: Table) {
     }
 }
 
+export function viewportAreaEditor(t: Table, range: Range) {
+    const { _selector, _overlayer } = t
+    const { _rowHeader, _colHeader, viewport } = t._renderer
+    const getIntersects = ({ range }: Area, it: Range): boolean => {
+        return range.intersects(it)
+    }
+    const getRect = (area: Area, it: Range): Rect => {
+        return area.rect(it)
+    }
+
+    if (_selector && viewport) {
+        const area = viewport.areas[3]
+        const rect = getRect(area, range) // 获取绘制区域
+
+        const intersects = getIntersects(area, range) // 判断是否位于可视区域
+        if (!intersects) return // 不位于可视区域 - 不提供 canvas 功能
+
+        // console.log(`source - [x: ${area.x}, y: ${area.y}], rect: [x: ${rect.x}, y: ${rect.y}]`)
+
+        const canvas = t._canvas?._ as HTMLCanvasElement
+        // 在 canvas 上 10,10 的位置横向画一条长度为 100px 宽度为 5px 的黑线
+        if (canvas) {
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+                ctx.lineWidth = 2
+                ctx.beginPath()
+                return {
+                    ctx,
+                    position: {
+                        x: area.x + rect.x,
+                        y: area.y + rect.y,
+                    },
+                }
+            }
+        }
+    }
+}
+
 export default {
     init,
     setCellStyle,
@@ -1048,4 +1122,5 @@ export default {
     mergeGrid,
     freezeGrid,
     paintFormat,
+    viewportAreaEditor,
 }
