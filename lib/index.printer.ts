@@ -217,6 +217,130 @@ export default class Printer {
         }
     }
 
+    // paper
+    renderPaperArea() {
+        // 获取对应的纸张尺寸
+        let paperWidth, paperHeight
+        if (this.formValue.direction === 'portrait') {
+            ;[paperWidth, paperHeight] = this.currentPaper!.size
+        } else {
+            ;[paperHeight, paperWidth] = this.currentPaper!.size
+        }
+        console.log(
+            `paper is: ${this.currentPaper?.code}, direction: ${this.formValue.direction}, width: ${paperWidth}, height: ${paperHeight}`,
+        )
+
+        const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.formValue.padding
+
+        // toHtml
+        const parser = new DOMParser()
+        const ht = this.table.toHtml(`A1:${xy2expr(...this.table.getMaxArea())}`)
+        const dataHtml = parser.parseFromString(ht, 'text/html')
+        const tableElement = dataHtml.body.firstChild as HTMLElement
+
+        const generatePaperDom = (table: HTMLElement) => {
+            const paper = h('div', 'paper')
+            paper.setStyles({
+                width: `${this.transferMMToPX(paperWidth)}px`,
+                height: `${this.transferMMToPX(paperHeight)}px`,
+                paddingTop: `${this.transferMMToPX(paddingTop)}px`,
+                paddingRight: `${this.transferMMToPX(paddingRight)}px`,
+                paddingBottom: `${this.transferMMToPX(paddingBottom)}px`,
+                paddingLeft: `${this.transferMMToPX(paddingLeft)}px`,
+                boxSizing: 'border-box',
+                margin: '20px auto',
+                background: '#fff',
+            })
+
+            const paperContent = h('div', 'paper-content')
+            paperContent.setStyles({
+                width: `${this.transferMMToPX(paperWidth - paddingLeft - paddingRight)}px`,
+                height: `${this.transferMMToPX(paperHeight - paddingTop - paddingBottom)}px`,
+                // border: '1pt solid red',
+                boxSizing: 'border-box',
+                overflow: 'hidden',
+                position: 'relative',
+            })
+            paperContent.append(table)
+
+            paper.append(paperContent)
+            return paper
+        }
+
+        const innerWidth = this.transferMMToPX(paperWidth - paddingLeft - paddingRight)
+        const innerHeight = this.transferMMToPX(paperHeight - paddingTop - paddingBottom)
+
+        const transformRenderType = () => {
+            let tableWidth = 0
+            const tdWidthArr = [] as number[]
+            const transformX: { x: number; width: number }[] = [{ x: 0, width: 0 }]
+            tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
+                const lastTransformX = transformX[transformX.length - 1]
+                const attrWidth = Number(item.getAttribute('width'))
+                const width = !Number.isNaN(attrWidth) ? attrWidth : 100
+                tdWidthArr.push(width)
+                tableWidth += width
+                if (innerWidth - lastTransformX.width >= width) {
+                    lastTransformX.width += width
+                } else {
+                    transformX.push({ x: lastTransformX.x + lastTransformX.width, width })
+                }
+            })
+
+            tableElement.style.width = `${tdWidthArr.reduce((s, v) => s + v, 0)}px`
+
+            const transformY: { y: number; height: number }[] = [{ y: 0, height: 0 }]
+            const trDoms = tableElement.querySelectorAll('tr')
+            trDoms.forEach((tr, rowIndex) => {
+                const lastTransformY = transformY[transformY.length - 1]
+                const height = Number(tr.style.height.replaceAll('px', ''))
+                if (innerHeight - lastTransformY.height >= height) {
+                    lastTransformY.height += height
+                } else {
+                    transformY.push({ y: lastTransformY.y + lastTransformY.height, height })
+                }
+                const tdDoms = tr.querySelectorAll('td')
+                tdDoms.forEach((td, colIndex) => {
+                    td.style.fontSize = '13px'
+                })
+            })
+
+            const transformArrs: ((typeof transformX)[0] & (typeof transformY)[0])[] = []
+            transformY.forEach((yItem) => {
+                transformX.forEach((xItem) => {
+                    transformArrs.push({
+                        ...xItem,
+                        ...yItem,
+                    })
+                })
+            })
+
+            return transformArrs.map((item, index) => {
+                const tableDom = tableElement.cloneNode(true) as HTMLElement
+                tableDom.style.position = 'absolute'
+                tableDom.style.left = `${item.x * -1}px`
+                tableDom.style.top = `${item.y * -1}px`
+                const tableContainer = h('div')
+                tableContainer.setStyles({
+                    position: 'relative',
+                    width: `${item.width + 1}px`,
+                    height: `${item.height + 1}px`,
+                    boxSizing: 'border-box',
+                    overflow: 'hidden',
+                })
+                tableContainer.append(tableDom)
+                const paper = generatePaperDom(tableContainer._)
+                // paper.style.position = 'absolute'
+                // paper.style.left = `${item.x}px`
+                // paper.style.top = `${item.y}px`
+                // paper.style.width = `${item.width}px`
+                // paper.style.height = `${item.height}px`
+
+                return paper
+            })
+        }
+        return transformRenderType()
+    }
     // transform move method
     renderPapaer() {
         if (!this.currentPaper) return
@@ -350,248 +474,6 @@ export default class Printer {
             overflow: 'auto',
             boxSizing: 'border-box',
         })
-        // paper
-        const renderPaperArea = () => {
-            paperArea._.innerHTML = ''
-
-            // 获取对应的纸张尺寸
-            let paperWidth, paperHeight
-            if (this.formValue.direction === 'portrait') {
-                ;[paperWidth, paperHeight] = this.currentPaper!.size
-            } else {
-                ;[paperHeight, paperWidth] = this.currentPaper!.size
-            }
-            console.log(
-                `paper is: ${this.currentPaper?.code}, direction: ${this.formValue.direction}, width: ${paperWidth}, height: ${paperHeight}`,
-            )
-
-            const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.formValue.padding
-
-            // toHtml
-            const parser = new DOMParser()
-            const ht = this.table.toHtml(`A1:${xy2expr(...this.table.getMaxArea())}`)
-            const dataHtml = parser.parseFromString(ht, 'text/html')
-            const tableElement = dataHtml.body.firstChild as HTMLElement
-
-            const generatePaperDom = (table: HTMLElement) => {
-                const paper = h('div', 'paper')
-                paper.setStyles({
-                    width: `${this.transferMMToPX(paperWidth)}px`,
-                    height: `${this.transferMMToPX(paperHeight)}px`,
-                    paddingTop: `${this.transferMMToPX(paddingTop)}px`,
-                    paddingRight: `${this.transferMMToPX(paddingRight)}px`,
-                    paddingBottom: `${this.transferMMToPX(paddingBottom)}px`,
-                    paddingLeft: `${this.transferMMToPX(paddingLeft)}px`,
-                    boxSizing: 'border-box',
-                    margin: '20px auto',
-                    background: '#fff',
-                })
-
-                const paperContent = h('div', 'paper-content')
-                paperContent.setStyles({
-                    width: `${this.transferMMToPX(paperWidth - paddingLeft - paddingRight)}px`,
-                    height: `${this.transferMMToPX(paperHeight - paddingTop - paddingBottom)}px`,
-                    // border: '1pt solid red',
-                    boxSizing: 'border-box',
-                    overflow: 'hidden',
-                    position: 'relative',
-                })
-                paperContent.append(table)
-
-                paper.append(paperContent)
-                return paper
-            }
-
-            const innerWidth = this.transferMMToPX(paperWidth - paddingLeft - paddingRight)
-            const innerHeight = this.transferMMToPX(paperHeight - paddingTop - paddingBottom)
-            const pages: { dom: HTMLElement; colWidths: number[] }[][] = []
-
-            // deperated.
-            // const baseRenderType = () => {
-            //     const tdWidthArr: number[] = []
-            //     tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
-            //         const width = Number(item.getAttribute('width'))
-            //         tdWidthArr.push(!Number.isNaN(width) ? width : 100)
-            //     })
-            //     const trDoms = tableElement.querySelectorAll('tr')
-            //     let currentInsertIndex = 0
-            //     let reduceHeight = innerHeight
-            //     let rowOffset = 0
-            //     trDoms.forEach((tr, rowIndex) => {
-            //         let currentInsertIndex2 = 0
-            //         const trHeight = Number(tr.style.height.replaceAll('px', ''))
-            //         if (reduceHeight < trHeight) {
-            //             rowOffset = rowIndex
-            //             currentInsertIndex++
-            //             reduceHeight = innerHeight
-            //         }
-            //         if (!pages[currentInsertIndex]) pages[currentInsertIndex] = []
-            //         const tdDoms = tr.querySelectorAll('td')
-            //         let reduceWidth = innerWidth
-            //         let colOffset = 0
-            //         tdDoms.forEach((td, colIndex) => {
-            //             let tdWidth = tdWidthArr[colIndex]
-            //             if (td.colSpan > 1) {
-            //                 for (let i = 1; i < td.colSpan; i++) {
-            //                     tdWidth += tdWidthArr[colIndex + i]
-            //                 }
-            //             }
-            //             if (reduceWidth < tdWidth) {
-            //                 const p = pages[currentInsertIndex][currentInsertIndex2]
-            //                 const oldTable = p?.dom
-            //                 if (oldTable) {
-            //                     // oldTable.style.width = `${innerWidth - reduceWidth}px`
-            //                     reduceWidth = innerWidth
-            //                 }
-            //                 colOffset = colIndex
-            //                 currentInsertIndex2++
-            //             }
-            //             // td.style.width = `${tdWidth}px`
-            //             let tar = pages[currentInsertIndex][currentInsertIndex2]
-            //             if (!tar) {
-            //                 const table = document.createElement('table')
-            //                 table.style.borderSpacing = '0'
-            //                 table.style.borderCollapse = 'collapse'
-            //                 pages[currentInsertIndex][currentInsertIndex2] = {
-            //                     colWidths: [],
-            //                     dom: table,
-            //                 }
-            //                 tar = pages[currentInsertIndex][currentInsertIndex2]
-            //             }
-            //             const currTable = tar?.dom
-            //             let tbody = currTable.querySelector('tbody')
-            //             if (!tbody) {
-            //                 tbody = document.createElement('tbody')
-            //                 currTable.appendChild(tbody)
-            //             }
-            //             let currTr = tbody.querySelectorAll('tr')[rowIndex - rowOffset]
-            //             if (!currTr) {
-            //                 currTr = tr.cloneNode() as HTMLTableRowElement
-            //                 tbody.appendChild(currTr)
-            //             }
-            //             if (!tar.colWidths[colIndex - colOffset]) {
-            //                 tar.colWidths[colIndex - colOffset] = tdWidth
-            //             }
-            //             currTr.appendChild(td.cloneNode(true))
-            //             reduceWidth -= tdWidth
-            //         })
-            //         reduceHeight -= trHeight
-            //     })
-            //     pages.flat().forEach((table) => {
-            //         const colGroupDom = document.createElement('colgroup')
-            //         let tableWidth = 0
-            //         table.colWidths.forEach((w) => {
-            //             const col = document.createElement('col')
-            //             tableWidth += w
-            //             col.setAttribute('width', `${w}`)
-            //             colGroupDom.appendChild(col)
-            //         })
-            //         table.dom.insertBefore(colGroupDom, table.dom.querySelector('tbody')!)
-            //         table.dom.style.width = `${tableWidth}px`
-            //         const paper = generatePaperDom(table.dom)
-            //         paperArea.append(paper)
-            //     })
-            // }
-
-            const transformRenderType = () => {
-                let tableWidth = 0
-                const tdWidthArr = [] as number[]
-                const transformX: { x: number; width: number }[] = [{ x: 0, width: 0 }]
-                tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
-                    const lastTransformX = transformX[transformX.length - 1]
-                    const attrWidth = Number(item.getAttribute('width'))
-                    const width = !Number.isNaN(attrWidth) ? attrWidth : 100
-                    tdWidthArr.push(width)
-                    tableWidth += width
-                    if (innerWidth - lastTransformX.width >= width) {
-                        lastTransformX.width += width
-                    } else {
-                        transformX.push({ x: lastTransformX.x + lastTransformX.width, width })
-                    }
-                })
-
-                tableElement.style.width = `${tdWidthArr.reduce((s, v) => s + v, 0)}px`
-
-                const transformY: { y: number; height: number }[] = [{ y: 0, height: 0 }]
-                const trDoms = tableElement.querySelectorAll('tr')
-                trDoms.forEach((tr, rowIndex) => {
-                    const lastTransformY = transformY[transformY.length - 1]
-                    const height = Number(tr.style.height.replaceAll('px', ''))
-                    if (innerHeight - lastTransformY.height >= height) {
-                        lastTransformY.height += height
-                    } else {
-                        transformY.push({ y: lastTransformY.y + lastTransformY.height, height })
-                    }
-                    const tdDoms = tr.querySelectorAll('td')
-                    tdDoms.forEach((td, colIndex) => {
-                        td.style.fontSize = '13px'
-                    })
-                })
-
-                const transformArrs: ((typeof transformX)[0] & (typeof transformY)[0])[] = []
-                transformY.forEach((yItem) => {
-                    transformX.forEach((xItem) => {
-                        transformArrs.push({
-                            ...xItem,
-                            ...yItem,
-                        })
-                    })
-                })
-
-                transformArrs.forEach((item, index) => {
-                    const tableDom = tableElement.cloneNode(true) as HTMLElement
-                    tableDom.style.position = 'absolute'
-                    tableDom.style.left = `${item.x * -1}px`
-                    tableDom.style.top = `${item.y * -1}px`
-                    const tableContainer = h('div')
-                    tableContainer.setStyles({
-                        position: 'relative',
-                        width: `${item.width + 1}px`,
-                        height: `${item.height + 1}px`,
-                        boxSizing: 'border-box',
-                        overflow: 'hidden',
-                    })
-                    tableContainer.append(tableDom)
-                    const paper = generatePaperDom(tableContainer._)
-                    paperArea.append(paper)
-                    // paper.style.position = 'absolute'
-                    // paper.style.left = `${item.x}px`
-                    // paper.style.top = `${item.y}px`
-                    // paper.style.width = `${item.width}px`
-                    // paper.style.height = `${item.height}px`
-                })
-            }
-
-            // debug mode
-            transformRenderType()
-
-            // if (this.formValue.renderMode === 'compat') {
-            //     transformRenderType()
-            // } else {
-            //     baseRenderType()
-            // }
-
-            // const debugMode = () => {
-            //     paperArea._.innerHTML = ''
-
-            //     for (let i = 0; i < 5; i++) {
-            //         const d = h('div')
-            //         d.setStyles({
-            //             width: '100%',
-            //             height: '100%',
-            //             border: '1px solid red',
-            //             boxSizing: 'border-box',
-            //             position: 'absolute',
-            //             top: 0,
-            //             left: 0,
-            //         })
-            //         d._.innerHTML = `<p style="text-align: center">page ${i + 1}</p>`
-            //         const paper = generatePaperDom(d._)
-            //         paperArea.append(paper)
-            //     }
-            // }
-            // debugMode()
-        }
 
         const confArea = h('div')
             .setStyles({
@@ -628,6 +510,11 @@ export default class Printer {
                 paper: this.formValue.paper,
             })
         })
+
+        const renderPaperArea = () => {
+            paperArea._.innerHTML = ''
+            paperArea.append(...this.renderPaperArea())
+        }
 
         renderPaperArea()
         this.dialog.show()
