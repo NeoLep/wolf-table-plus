@@ -125,6 +125,8 @@ export function toHtml(t: Table, from: string) {
                 let styleValue: Partial<Style> = {}
                 if (cell && cell instanceof Object && cell.style !== undefined) {
                     styleValue = t.style(cell.style, true)
+                } else {
+                    styleValue = t._data.style
                 }
 
                 cssStyleStr += style2css(styleValue)
@@ -177,7 +179,7 @@ export function fromHtml(
             let prevBorder: Border | null = null
             const borders: Border[] = []
 
-            for (const [colIndex, td] of tds.entries()) {
+            for (const [colIndex, td] of (tds as any).entries()) {
                 // eslint-disable-next-line prefer-const
                 let [r, c] = [rowIndex + toStartRow, colIndex + toStartCol]
                 if (skips.length > 0) {
@@ -390,12 +392,12 @@ function style2css(s: Partial<Style>) {
     if (s.color) cssStr += `color: ${s.color};`
     if (s.align) cssStr += `text-align: ${s.align};`
     if (s.valign) cssStr += `vertical-align: ${s.valign};`
-    if (s.textwrap === true) cssStr += `white-space: normal; word-wrap: break-word;`
+    if (s.textwrap === true) cssStr += `white-space: normal; word-wrap: break-word; word-break: break-all;`
     if (s.underline === true) cssStr += `text-decoration: underline;`
     if (s.strikethrough === true) cssStr += `text-decoration: line-through;`
     if (s.bold === true) cssStr += `font-weight: bold;`
     if (s.italic === true) cssStr += `font-style: italic;`
     if (s.fontFamily) cssStr += `font-family: ${s.fontFamily};`
-    if (s.fontSize) cssStr += `font-size: ${Math.floor(pt2px(s.fontSize))}px; line-height: ${Math.floor(pt2px(s.fontSize))}px;`
+    if (s.fontSize) cssStr += `font-size: ${Math.floor(pt2px(s.fontSize))}px; line-height: ${Math.floor(pt2px(s.fontSize)) + 1}px;`
     return cssStr
 }
