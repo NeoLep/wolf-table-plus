@@ -19,7 +19,7 @@ import type {
  */
 export function toHtml(t: Table, from: string) {
     let htmlStr =
-        '<table xmlns="http://www.w3.org/1999/xhtml" style="border-spacing: 0; border-collapse: collapse;">'
+        '<table xmlns="http://www.w3.org/1999/xhtml" style="border-spacing: 0; border-collapse: collapse; table-layout: fixed;">'
     const fromRange = Range.with(from)
 
     // merges
@@ -121,12 +121,21 @@ export function toHtml(t: Table, from: string) {
                 if (cellIndexes.has(key)) {
                     cssStyleStr += cellIndexes.get(key)
                 }
+
+                let styleValue: Partial<Style> = {}
                 if (cell && cell instanceof Object && cell.style !== undefined) {
-                    cssStyleStr += style2css(t.style(cell.style, true))
+                    styleValue = t.style(cell.style, true)
                 }
 
-                htmlStr += `style="${cssStyleStr ? `${cssStyleStr};` : ''} position: relative; padding: 0 5px;"`
+                cssStyleStr += style2css(styleValue)
+                let innerStyleValue = `${cssStyleStr ? `${cssStyleStr};` : ''} position: relative; padding: 0 5px;`
+                if (!styleValue.textwrap) {
+                    innerStyleValue += "word-break: keep-all; white-space: nowrap; overflow: hidden;"
+                }
 
+                htmlStr += `style="${innerStyleValue}"`
+                
+                
                 const cellType = cellTypeGetter(cell)
                 htmlStr += Renders.use().getRender(cellType).toHtml(t, cell, r, c, htmlStr)
             }
@@ -381,7 +390,7 @@ function style2css(s: Partial<Style>) {
     if (s.color) cssStr += `color: ${s.color};`
     if (s.align) cssStr += `text-align: ${s.align};`
     if (s.valign) cssStr += `vertical-align: ${s.valign};`
-    if (s.textwrap === true) cssStr += `white-space: normal;`
+    if (s.textwrap === true) cssStr += `white-space: normal; word-wrap: break-word;`
     if (s.underline === true) cssStr += `text-decoration: underline;`
     if (s.strikethrough === true) cssStr += `text-decoration: line-through;`
     if (s.bold === true) cssStr += `font-weight: bold;`

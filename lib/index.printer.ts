@@ -234,34 +234,34 @@ export default class Printer {
             const form = new Form(
                 {
                     fields: [
-                        {
-                            label: '渲染模式',
-                            prop: 'renderMode',
-                            component: (() => {
-                                const comp = new FormItemSelect('', {
-                                    placeholder: '请选择渲染模式',
-                                    clearable: true,
-                                    options: [
-                                        {
-                                            label: '基础模式',
-                                            value: 'normal',
-                                        },
-                                        {
-                                            label: '兼容模式',
-                                            value: 'compat',
-                                        },
-                                    ],
-                                })
-                                comp.on(
-                                    'change',
-                                    (value: (typeof this.formValue)['renderMode']) => {
-                                        this.formValue.renderMode = value
-                                        renderPaperArea()
-                                    },
-                                )
-                                return comp
-                            })(),
-                        },
+                        // {
+                        //     label: '渲染模式',
+                        //     prop: 'renderMode',
+                        //     component: (() => {
+                        //         const comp = new FormItemSelect('', {
+                        //             placeholder: '请选择渲染模式',
+                        //             clearable: true,
+                        //             options: [
+                        //                 {
+                        //                     label: '基础模式',
+                        //                     value: 'normal',
+                        //                 },
+                        //                 {
+                        //                     label: '兼容模式',
+                        //                     value: 'compat',
+                        //                 },
+                        //             ],
+                        //         })
+                        //         comp.on(
+                        //             'change',
+                        //             (value: (typeof this.formValue)['renderMode']) => {
+                        //                 this.formValue.renderMode = value
+                        //                 renderPaperArea()
+                        //             },
+                        //         )
+                        //         return comp
+                        //     })(),
+                        // },
                         {
                             label: '纸张尺寸',
                             prop: 'paper',
@@ -406,91 +406,102 @@ export default class Printer {
             const innerHeight = this.transferMMToPX(paperHeight - paddingTop - paddingBottom)
             const pages: { dom: HTMLElement; colWidths: number[] }[][] = []
 
-            const baseRenderType = () => {
-                const tdWidthArr: number[] = []
-                tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
-                    const width = Number(item.getAttribute('width'))
-                    tdWidthArr.push(!Number.isNaN(width) ? width : 100)
-                })
-                const trDoms = tableElement.querySelectorAll('tr')
-                let currentInsertIndex = 0
-                let reduceHeight = innerHeight
-                let rowOffset = 0
-                trDoms.forEach((tr, rowIndex) => {
-                    let currentInsertIndex2 = 0
-                    const trHeight = Number(tr.style.height.replaceAll('px', ''))
-                    if (reduceHeight < trHeight) {
-                        rowOffset = rowIndex
-                        currentInsertIndex++
-                        reduceHeight = innerHeight
-                    }
-                    if (!pages[currentInsertIndex]) pages[currentInsertIndex] = []
-                    const tdDoms = tr.querySelectorAll('td')
-                    let reduceWidth = innerWidth
-                    let colOffset = 0
-                    tdDoms.forEach((td, colIndex) => {
-                        const tdWidth = tdWidthArr[colIndex]
-                        if (reduceWidth < tdWidth) {
-                            const p = pages[currentInsertIndex][currentInsertIndex2]
-                            const oldTable = p?.dom
-                            if (oldTable) {
-                                // oldTable.style.width = `${innerWidth - reduceWidth}px`
-                                reduceWidth = innerWidth
-                            }
-                            colOffset = colIndex
-                            currentInsertIndex2++
-                        }
-                        // td.style.width = `${tdWidth}px`
-                        let tar = pages[currentInsertIndex][currentInsertIndex2]
-                        if (!tar) {
-                            const table = document.createElement('table')
-                            table.style.borderSpacing = '0'
-                            table.style.borderCollapse = 'collapse'
-                            pages[currentInsertIndex][currentInsertIndex2] = {
-                                colWidths: [],
-                                dom: table,
-                            }
-                            tar = pages[currentInsertIndex][currentInsertIndex2]
-                        }
-                        const currTable = tar?.dom
-                        let tbody = currTable.querySelector('tbody')
-                        if (!tbody) {
-                            tbody = document.createElement('tbody')
-                            currTable.appendChild(tbody)
-                        }
-                        let currTr = tbody.querySelectorAll('tr')[rowIndex - rowOffset]
-                        if (!currTr) {
-                            currTr = tr.cloneNode() as HTMLTableRowElement
-                            tbody.appendChild(currTr)
-                        }
-                        if (!tar.colWidths[colIndex - colOffset]) {
-                            tar.colWidths[colIndex - colOffset] = tdWidth
-                        }
-                        currTr.appendChild(td.cloneNode(true))
-                        reduceWidth -= tdWidth
-                    })
-                    reduceHeight -= trHeight
-                })
-                pages.flat().forEach((table) => {
-                    const colGroupDom = document.createElement('colgroup')
-                    table.colWidths.forEach((w) => {
-                        const col = document.createElement('col')
-                        col.setAttribute('width', `${w}`)
-                        colGroupDom.appendChild(col)
-                    })
-                    table.dom.appendChild(colGroupDom)
-                    const paper = generatePaperDom(table.dom)
-                    paperArea.append(paper)
-                })
-            }
+            // deperated.
+            // const baseRenderType = () => {
+            //     const tdWidthArr: number[] = []
+            //     tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
+            //         const width = Number(item.getAttribute('width'))
+            //         tdWidthArr.push(!Number.isNaN(width) ? width : 100)
+            //     })
+            //     const trDoms = tableElement.querySelectorAll('tr')
+            //     let currentInsertIndex = 0
+            //     let reduceHeight = innerHeight
+            //     let rowOffset = 0
+            //     trDoms.forEach((tr, rowIndex) => {
+            //         let currentInsertIndex2 = 0
+            //         const trHeight = Number(tr.style.height.replaceAll('px', ''))
+            //         if (reduceHeight < trHeight) {
+            //             rowOffset = rowIndex
+            //             currentInsertIndex++
+            //             reduceHeight = innerHeight
+            //         }
+            //         if (!pages[currentInsertIndex]) pages[currentInsertIndex] = []
+            //         const tdDoms = tr.querySelectorAll('td')
+            //         let reduceWidth = innerWidth
+            //         let colOffset = 0
+            //         tdDoms.forEach((td, colIndex) => {
+            //             let tdWidth = tdWidthArr[colIndex]
+            //             if (td.colSpan > 1) {
+            //                 for (let i = 1; i < td.colSpan; i++) {
+            //                     tdWidth += tdWidthArr[colIndex + i]
+            //                 }
+            //             }
+            //             if (reduceWidth < tdWidth) {
+            //                 const p = pages[currentInsertIndex][currentInsertIndex2]
+            //                 const oldTable = p?.dom
+            //                 if (oldTable) {
+            //                     // oldTable.style.width = `${innerWidth - reduceWidth}px`
+            //                     reduceWidth = innerWidth
+            //                 }
+            //                 colOffset = colIndex
+            //                 currentInsertIndex2++
+            //             }
+            //             // td.style.width = `${tdWidth}px`
+            //             let tar = pages[currentInsertIndex][currentInsertIndex2]
+            //             if (!tar) {
+            //                 const table = document.createElement('table')
+            //                 table.style.borderSpacing = '0'
+            //                 table.style.borderCollapse = 'collapse'
+            //                 pages[currentInsertIndex][currentInsertIndex2] = {
+            //                     colWidths: [],
+            //                     dom: table,
+            //                 }
+            //                 tar = pages[currentInsertIndex][currentInsertIndex2]
+            //             }
+            //             const currTable = tar?.dom
+            //             let tbody = currTable.querySelector('tbody')
+            //             if (!tbody) {
+            //                 tbody = document.createElement('tbody')
+            //                 currTable.appendChild(tbody)
+            //             }
+            //             let currTr = tbody.querySelectorAll('tr')[rowIndex - rowOffset]
+            //             if (!currTr) {
+            //                 currTr = tr.cloneNode() as HTMLTableRowElement
+            //                 tbody.appendChild(currTr)
+            //             }
+            //             if (!tar.colWidths[colIndex - colOffset]) {
+            //                 tar.colWidths[colIndex - colOffset] = tdWidth
+            //             }
+            //             currTr.appendChild(td.cloneNode(true))
+            //             reduceWidth -= tdWidth
+            //         })
+            //         reduceHeight -= trHeight
+            //     })
+            //     pages.flat().forEach((table) => {
+            //         const colGroupDom = document.createElement('colgroup')
+            //         let tableWidth = 0
+            //         table.colWidths.forEach((w) => {
+            //             const col = document.createElement('col')
+            //             tableWidth += w
+            //             col.setAttribute('width', `${w}`)
+            //             colGroupDom.appendChild(col)
+            //         })
+            //         table.dom.insertBefore(colGroupDom, table.dom.querySelector('tbody')!)
+            //         table.dom.style.width = `${tableWidth}px`
+            //         const paper = generatePaperDom(table.dom)
+            //         paperArea.append(paper)
+            //     })
+            // }
 
             const transformRenderType = () => {
                 let tableWidth = 0
+                const tdWidthArr = [] as number[]
                 const transformX: { x: number; width: number }[] = [{ x: 0, width: 0 }]
                 tableElement.querySelectorAll('colgroup col').forEach((item: Element) => {
                     const lastTransformX = transformX[transformX.length - 1]
                     const attrWidth = Number(item.getAttribute('width'))
                     const width = !Number.isNaN(attrWidth) ? attrWidth : 100
+                    tdWidthArr.push(width)
                     tableWidth += width
                     if (innerWidth - lastTransformX.width >= width) {
                         lastTransformX.width += width
@@ -499,7 +510,7 @@ export default class Printer {
                     }
                 })
 
-                tableElement.style.width = `max-content`
+                tableElement.style.width = `${tdWidthArr.reduce((s, v) => s + v, 0)}px`
 
                 const transformY: { y: number; height: number }[] = [{ y: 0, height: 0 }]
                 const trDoms = tableElement.querySelectorAll('tr')
@@ -511,6 +522,10 @@ export default class Printer {
                     } else {
                         transformY.push({ y: lastTransformY.y + lastTransformY.height, height })
                     }
+                    const tdDoms = tr.querySelectorAll('td')
+                    tdDoms.forEach((td, colIndex) => {
+                        td.style.fontSize = '13px'
+                    })
                 })
 
                 const transformArrs: ((typeof transformX)[0] & (typeof transformY)[0])[] = []
@@ -548,11 +563,13 @@ export default class Printer {
             }
 
             // debug mode
-            if (this.formValue.renderMode === 'compat') {
-                transformRenderType()
-            } else {
-                baseRenderType()
-            }
+            transformRenderType()
+
+            // if (this.formValue.renderMode === 'compat') {
+            //     transformRenderType()
+            // } else {
+            //     baseRenderType()
+            // }
 
             // const debugMode = () => {
             //     paperArea._.innerHTML = ''
