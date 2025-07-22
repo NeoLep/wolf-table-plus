@@ -5,6 +5,7 @@ import { stylePrefix } from './config'
 import Form, { EventController, FormItem, FormItemSelect } from './form'
 import { isFirefox } from './utils/brower-checker'
 import { xy2expr } from './table-renderer'
+import { dpi, mm2px } from './helper'
 
 export type PaperConf = {
     label?: string
@@ -35,6 +36,7 @@ const defaultPadding = (): [number, number, number, number] => {
         return [10, 10, 10, 10]
     }
 }
+
 class PaddingComponent extends FormItem {
     configs = {}
     carrier: HElement = h('div', [`${stylePrefix}-form-item--input`])
@@ -144,9 +146,6 @@ export default class Printer {
     })
     currentPaper: PaperConf | undefined
 
-    // MmPx: number = this.getPXEveryMM() // 每毫米的对应的像素值
-    dpi = this.getDeviceDPI()
-
     table: Table
     dialog: Dialog
 
@@ -179,21 +178,6 @@ export default class Printer {
         }
         return r
     }
-    getDeviceDPI() {
-        const tempDiv = document.createElement('div')
-        tempDiv.style.width = '1in'
-        tempDiv.style.visibility = 'hidden'
-        document.body.appendChild(tempDiv)
-        const dpi = tempDiv.offsetWidth
-        document.body.removeChild(tempDiv)
-        return dpi
-    }
-    transferMMToPX(mm: number) {
-        return Math.ceil((mm * this.dpi) / 25.4)
-    }
-    transferPXToMM(px: number) {
-        return (px * 25.4) / this.dpi
-    }
 
     getCurrentPaperInfo() {
         if (!this.currentPaper) return undefined
@@ -206,8 +190,8 @@ export default class Printer {
                 ;[paperHeight, paperWidth] = this.currentPaper!.size
             }
             const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.formValue.padding
-            const innerWidth = this.transferMMToPX(paperWidth - paddingLeft - paddingRight)
-            const innerHeight = this.transferMMToPX(paperHeight - paddingTop - paddingBottom)
+            const innerWidth = mm2px(paperWidth - paddingLeft - paddingRight)
+            const innerHeight = mm2px(paperHeight - paddingTop - paddingBottom)
 
             return {
                 direction: this.formValue.direction,
@@ -218,19 +202,37 @@ export default class Printer {
     }
 
     // paper
-    renderPaperArea() {
+    renderPaperDom(conf?: typeof this.formValue) {
+        if (!conf) {
+            conf = {
+                renderMode: 'normal' as const,
+                paper: 'A4',
+                padding: defaultPadding(),
+                direction: 'portrait' as 'portrait' | 'landscape',
+            }
+        }
+
+        let currentPaper = this.currentPaper
+
+        if (!currentPaper) {
+            currentPaper = this.getPaperByCode(conf.paper)
+        }
+        if (!currentPaper) {
+            throw new Error('currentPaper not found')
+        }
+
         // 获取对应的纸张尺寸
         let paperWidth, paperHeight
-        if (this.formValue.direction === 'portrait') {
-            ;[paperWidth, paperHeight] = this.currentPaper!.size
+        if (conf.direction === 'portrait') {
+            ;[paperWidth, paperHeight] = currentPaper.size
         } else {
-            ;[paperHeight, paperWidth] = this.currentPaper!.size
+            ;[paperHeight, paperWidth] = currentPaper.size
         }
         console.log(
-            `paper is: ${this.currentPaper?.code}, direction: ${this.formValue.direction}, width: ${paperWidth}, height: ${paperHeight}`,
+            `paper is: ${currentPaper?.code}, direction: ${conf.direction}, width: ${paperWidth}, height: ${paperHeight}`,
         )
 
-        const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.formValue.padding
+        const [paddingTop, paddingRight, paddingBottom, paddingLeft] = conf.padding
 
         // toHtml
         const parser = new DOMParser()
@@ -241,12 +243,12 @@ export default class Printer {
         const generatePaperDom = (table: HTMLElement) => {
             const paper = h('div', 'paper')
             paper.setStyles({
-                width: `${this.transferMMToPX(paperWidth)}px`,
-                height: `${this.transferMMToPX(paperHeight)}px`,
-                paddingTop: `${this.transferMMToPX(paddingTop)}px`,
-                paddingRight: `${this.transferMMToPX(paddingRight)}px`,
-                paddingBottom: `${this.transferMMToPX(paddingBottom)}px`,
-                paddingLeft: `${this.transferMMToPX(paddingLeft)}px`,
+                width: `${mm2px(paperWidth)}px`,
+                height: `${mm2px(paperHeight)}px`,
+                paddingTop: `${mm2px(paddingTop)}px`,
+                paddingRight: `${mm2px(paddingRight)}px`,
+                paddingBottom: `${mm2px(paddingBottom)}px`,
+                paddingLeft: `${mm2px(paddingLeft)}px`,
                 boxSizing: 'border-box',
                 margin: '20px auto',
                 background: '#fff',
@@ -254,8 +256,8 @@ export default class Printer {
 
             const paperContent = h('div', 'paper-content')
             paperContent.setStyles({
-                width: `${this.transferMMToPX(paperWidth - paddingLeft - paddingRight)}px`,
-                height: `${this.transferMMToPX(paperHeight - paddingTop - paddingBottom)}px`,
+                width: `${mm2px(paperWidth - paddingLeft - paddingRight)}px`,
+                height: `${mm2px(paperHeight - paddingTop - paddingBottom)}px`,
                 // border: '1pt solid red',
                 boxSizing: 'border-box',
                 overflow: 'hidden',
@@ -267,8 +269,8 @@ export default class Printer {
             return paper
         }
 
-        const innerWidth = this.transferMMToPX(paperWidth - paddingLeft - paddingRight)
-        const innerHeight = this.transferMMToPX(paperHeight - paddingTop - paddingBottom)
+        const innerWidth = mm2px(paperWidth - paddingLeft - paddingRight)
+        const innerHeight = mm2px(paperHeight - paddingTop - paddingBottom)
 
         const transformRenderType = () => {
             let tableWidth = 0
@@ -300,9 +302,9 @@ export default class Printer {
                     transformY.push({ y: lastTransformY.y + lastTransformY.height, height })
                 }
                 const tdDoms = tr.querySelectorAll('td')
-                tdDoms.forEach((td, colIndex) => {
-                    td.style.fontSize = '13px'
-                })
+                // tdDoms.forEach((td, colIndex) => {
+                //     td.style.fontSize = '13px'
+                // })
             })
 
             const transformArrs: ((typeof transformX)[0] & (typeof transformY)[0])[] = []
@@ -513,7 +515,7 @@ export default class Printer {
 
         const renderPaperArea = () => {
             paperArea._.innerHTML = ''
-            paperArea.append(...this.renderPaperArea())
+            paperArea.append(...this.renderPaperDom(this.formValue))
         }
 
         renderPaperArea()

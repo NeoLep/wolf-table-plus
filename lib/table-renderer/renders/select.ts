@@ -1,6 +1,7 @@
 import { CanvasRenderFuncType, CellSelect, FromHtmlFuncType, ToHtmlFuncType } from '.'
 import { TextLineType, ViewportCell } from '..'
 import Table from '../..'
+import { pt2px } from '../../helper'
 import editor from '../../index.editor'
 import { cellValueGetter } from '../cell-render'
 import { fontString, textx, texty, textLine } from './text'
@@ -96,7 +97,7 @@ export const selectCanvasRender: CanvasRenderFuncType = (
         }
     })
 
-    const fontHeight = fontSize / 0.75 // pt => px
+    const fontHeight = pt2px(fontSize) // pt => px
     const txtHeight = (ntxts.length - 1) * fontHeight
     const lineTypes: TextLineType[] = []
     if (underline) lineTypes.push('underline')

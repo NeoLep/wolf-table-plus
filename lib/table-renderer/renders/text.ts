@@ -10,6 +10,7 @@ import type {
 import type { Align, TextLineType, VerticalAlign } from '..'
 import Editor from '../../editor'
 import TextEditor from '../../editor/text'
+import { pt2px } from '../../helper'
 
 // align: top | middle | bottom
 // height: the height of cell
@@ -163,7 +164,7 @@ export const textCanvasRender: CanvasRenderFuncType = (
         }
     })
 
-    const fontHeight = fontSize / 0.75 // pt => px
+    const fontHeight = pt2px(fontSize) // pt => px
     const txtHeight = (ntxts.length - 1) * fontHeight
     const lineTypes: TextLineType[] = []
     if (underline) lineTypes.push('underline')
@@ -186,8 +187,8 @@ export const textCanvasRender: CanvasRenderFuncType = (
     canvas.restore()
     return {
         contentInfo: {
-            width: contentWidth,
-            height: contentHeight + 10,
+            width: Math.ceil(contentWidth),
+            height: Math.ceil(contentHeight + 10),
         },
     }
 }

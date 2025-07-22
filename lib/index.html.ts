@@ -396,6 +396,6 @@ function style2css(s: Partial<Style>) {
     if (s.bold === true) cssStr += `font-weight: bold;`
     if (s.italic === true) cssStr += `font-style: italic;`
     if (s.fontFamily) cssStr += `font-family: ${s.fontFamily};`
-    if (s.fontSize) cssStr += `font-size: ${s.fontSize}pt;`
+    if (s.fontSize) cssStr += `font-size: ${Math.floor(pt2px(s.fontSize))}px; line-height: ${Math.floor(pt2px(s.fontSize))}px;`
     return cssStr
 }

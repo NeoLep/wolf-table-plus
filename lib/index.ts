@@ -600,16 +600,6 @@ export default class Table {
             }
 
             _renderer.render()
-            // .row((index) => {
-            //   const r = row(_data, index)
-            //   if (
-            //     this._renderer._activeRowHeight![index] &&
-            //     _data.rows[index]?.height === undefined
-            //   ) {
-            //     r.height = this._renderer._activeRowHeight![index]
-            //   }
-            //   return r
-            // })
 
             selector.reset(this)
             this._canvas.focus()

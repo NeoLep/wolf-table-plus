@@ -29,6 +29,30 @@ export function equals(obj1: Record<string, unknown>, obj2: Record<string, unkno
     return true
 }
 
+export function throttle(fn: Function, delay: number) {
+    let timer: number | null = null
+    return (...args: unknown[]) => {
+        if (!timer) {
+            timer = window.setTimeout(() => {
+                fn.apply(null, ...args)
+                timer = null
+            }, delay || 0)
+        }
+    }
+}
+
+export const getDeviceDPI = () => {
+    const tempDiv = document.createElement('div')
+    tempDiv.style.width = '1in'
+    tempDiv.style.visibility = 'hidden'
+    document.body.appendChild(tempDiv)
+    const dpi = tempDiv.offsetWidth
+    document.body.removeChild(tempDiv)
+    return dpi
+}
+
+export const dpi = getDeviceDPI()
+
 /**
  * Point	Pixel
 0.75 pt	1 px
@@ -65,17 +89,17 @@ export function pt2px(pt: number): number {
     else if (pt <= 3) return 4
     else if (pt <= 3.75) return 5
     else if (pt <= 4.5) return 6
-    return (96 / 72) * pt
+    return Math.round((dpi / 72) * pt)
 }
 
-export function throttle(fn: Function, delay: number) {
-    let timer: number | null = null
-    return (...args: unknown[]) => {
-        if (!timer) {
-            timer = window.setTimeout(() => {
-                fn.apply(null, ...args)
-                timer = null
-            }, delay || 0)
-        }
-    }
+export const px2pt = (px: number) => {
+    return (72 / dpi) * px
+}
+
+export const mm2px = (mm: number) => {
+    return Math.ceil((mm * dpi) / 25.4)
+}
+
+export const px2mm = (px: number) => {
+    return (px * 25.4) / dpi
 }
