@@ -889,6 +889,23 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
     }
 }
 
+function indexParser(a: [number, number], d: [number, number]) {
+    if (a[0] >= d[0] && a[1] <= d[1]) {
+        return null
+    } else if ((a[0] <= d[0] && d[0] <= a[1]) || (a[0] <= d[1] && d[1] <= a[1])) {
+        if (a[0] <= d[0] && d[0] <= a[1]) {
+            return [a[0], a[0] + (a[1] - a[0]) - (d[1] - d[0]) - 1]
+        } else {
+            return [d[0], a[1] - d[1] - 1]
+        }
+    } else if (a[0] > d[1]) {
+        const len = d[1] - d[0] + 1
+        return [a[0] - len, a[1] - len]
+    } else {
+        return a
+    }
+}
+
 function deleteRowOrCol(table: Table, type: 'row' | 'col') {
     if (table._selector) {
         table.addHistory(`delete ${type}`)
@@ -904,37 +921,51 @@ function deleteRowOrCol(table: Table, type: 'row' | 'col') {
         const maxCol = getMaxColIndexHasValue(table.data())
 
         const targetIndex: Record<string, boolean> = {}
-        // 获取合并进行 - 1
-        table._data.merges = table._data.merges
-            .map((item) => {
-                const refs = item.split(':')
-                let [col, row] = expr2xy(refs[0])
-                let [col2, row2] = expr2xy(refs[1])
-                if (type === 'row') {
-                    if (row >= startRow && row2 <= endRow) return null
-                    targetIndex[`${row}-${col}`] = true
-                    if (row > startRow) row -= offsetRow
-                    if (row2 > startRow) row2 -= offsetRow
-                } else {
-                    if (col >= startCol && col2 <= endCol) return null
-                    targetIndex[`${row}-${col}`] = true
-                    if (col > startRow) col -= offsetCol
-                    if (col2 > startRow) col2 -= offsetCol
-                }
-                const res = `${xy2expr(col, row)}:${xy2expr(col2, row2)}`
-                return res
-            })
-            .filter((item) => !!item) as string[]
 
+        // expr like: A1:A2
+        const exprTransfer = (expr: string) => {
+            const refs = expr.split(':')
+            const [col, row] = expr2xy(refs[0])
+            const [col2, row2] = expr2xy(refs[1])
+            if (type === 'row') {
+                const res = indexParser([row, row2], [startRow, endRow])
+                if (res) {
+                    return `${xy2expr(col, res[0])}:${xy2expr(col2, res[1])}`
+                } else return null
+            } else {
+                const res = indexParser([col, col2], [startCol, endCol])
+                if (res) {
+                    return `${xy2expr(res[0], row)}:${xy2expr(res[1], row2)}`
+                } else return null
+            }
+        }
+
+        // 合并移动
+        table._data.merges = table._data.merges
+            .map((expr) => exprTransfer(expr))
+            .filter((item) => !!item) as string[]
+        // 边框移动
+        table._data.borders = table._data.borders
+            .map((border) => {
+                const [expr, ..._] = border
+                const nExpr = exprTransfer(expr)
+                if (nExpr) {
+                    border[0] = nExpr
+                    return border
+                } else {
+                    return null
+                }
+            })
+            .filter((item) => !!item)
+
+        // 单元格操作
         if (type === 'row') {
             if (startRow <= maxRow) {
                 table._cells._.forEach((cellItem, index) => {
                     if (cellItem) {
                         const [row, col, cell] = cellItem
                         if (row >= startRow && row <= endRow) {
-                            if (!targetIndex[`${row}-${col}`]) {
-                                table._cells._[index] = null
-                            }
+                            table._cells._[index] = null
                         } else if (row > startRow) {
                             cellItem[0] -= offsetRow
                         }
@@ -948,10 +979,8 @@ function deleteRowOrCol(table: Table, type: 'row' | 'col') {
                     if (cellItem) {
                         const [row, col, cell] = cellItem
                         if (col >= startCol && col <= endCol) {
-                            if (!targetIndex[`${row}-${col}`]) {
-                                table._cells._[index] = null
-                            }
-                        } else if (row > startCol) {
+                            table._cells._[index] = null
+                        } else if (col > startCol) {
                             cellItem[1] -= offsetCol
                         }
                     }
@@ -959,7 +988,6 @@ function deleteRowOrCol(table: Table, type: 'row' | 'col') {
                 table._cells._ = table._cells._.filter((item) => !!item)
             }
         }
-
         // 与增加不同, 需要最后再进行删除操作
         if (type === 'row') {
             table._data.rows.len -= offsetRow
