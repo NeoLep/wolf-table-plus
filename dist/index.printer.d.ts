@@ -1,5 +1,5 @@
 import Dialog from './dialog';
-import Table from '.';
+import Table, { HElement } from '.';
 export type PaperConf = {
     label?: string;
     code: string;
@@ -13,7 +13,6 @@ export default class Printer {
         size: [number, number];
     }[];
     currentPaper: PaperConf | undefined;
-    dpi: number;
     table: Table;
     dialog: Dialog;
     formValue: {
@@ -28,14 +27,12 @@ export default class Printer {
         code: string;
         size: [number, number];
     } | undefined;
-    getDeviceDPI(): number;
-    transferMMToPX(mm: number): number;
-    transferPXToMM(px: number): number;
     getCurrentPaperInfo(): {
         direction: "portrait" | "landscape";
         width: number;
         height: number;
     } | undefined;
+    renderPaperDom(conf?: typeof this.formValue): HElement[];
     renderPapaer(): void;
     printDOM(element: HTMLElement, config: {
         direction: 'portrait' | 'landscape';

@@ -79,8 +79,12 @@ export default class Table {
     constructor(element: HTMLElement | string, width: () => number, height: () => number, options?: TableOptions);
     contentRect(): Rect;
     container(): HElement;
-    resize(): void;
+    resize(conf?: {
+        width?: (() => number) | number;
+        height?: (() => number) | number;
+    }): void;
     freeze(ref?: string): this;
+    inMerged(ref: string): string | undefined;
     isMerged(): boolean;
     isMerged(ref: string): boolean;
     merge(): Table;

@@ -1,5 +1,8 @@
 export declare function sum(min: number, max: number, getv: (index: number) => number): number;
 export declare function equals(obj1: Record<string, unknown>, obj2: Record<string, unknown>): boolean;
+export declare function throttle(fn: Function, delay: number): (...args: unknown[]) => void;
+export declare const getDeviceDPI: () => number;
+export declare const dpi: number;
 /**
  * Point	Pixel
 0.75 pt	1 px
@@ -30,4 +33,6 @@ export declare function equals(obj1: Record<string, unknown>, obj2: Record<strin
  * @param pt
  */
 export declare function pt2px(pt: number): number;
-export declare function throttle(fn: Function, delay: number): (...args: unknown[]) => void;
+export declare const px2pt: (px: number) => number;
+export declare const mm2px: (mm: number) => number;
+export declare const px2mm: (px: number) => number;

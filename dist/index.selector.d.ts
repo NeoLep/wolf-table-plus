@@ -3,12 +3,12 @@ import Selector from './selector';
 import { type MoveDirection } from '.';
 import type { SupportFormats } from './data/format';
 import type { DataCell } from './data';
-import type { Style, Border } from './table-renderer';
+import type { Border, Style } from './table-renderer';
 import type Table from '.';
 declare function init(t: Table): void;
 declare function setCellValue(t: Table, value: DataCell): void;
-declare function clearCellValue(t: Table): void;
-declare function clearCell(t: Table): void;
+declare function clearCellValue(t: Table, ref?: string | Range[]): void;
+declare function clearCell(t: Table, ref?: string | Range[], type?: 'value' | 'style'): void;
 /** r,c is in the selected region */
 declare function isInRange(t: Table, r: number, c: number): boolean;
 declare function addRange(t: Table, r: number, c: number, clear: boolean): void;
@@ -19,7 +19,7 @@ declare function bindMousemove(t: Table, moveChange: (row: number, col: number) 
 declare function showCopy(t: Table): void;
 declare function clearCopy(t: Table): void;
 declare function copyValue(table: Table): void;
-declare function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean): void;
+declare function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean): Promise<void>;
 declare function fastSetCellFormat(table: Table, format?: SupportFormats): void;
 declare function fastSetCellFixed(table: Table, type: 'increase' | 'reduce'): void;
 declare function setCellStyle(table: Table, style: Partial<Style>): void;
@@ -37,6 +37,13 @@ declare function clearBorder(table: Table): void;
 declare function mergeGrid(table: Table): void;
 declare function freezeGrid(table: Table): void;
 declare function paintFormat(table: Table): void;
+export declare function viewportAreaEditor(t: Table, range: Range): {
+    ctx: CanvasRenderingContext2D;
+    position: {
+        x: number;
+        y: number;
+    };
+} | undefined;
 declare const _default: {
     init: typeof init;
     setCellStyle: typeof setCellStyle;
@@ -65,5 +72,6 @@ declare const _default: {
     mergeGrid: typeof mergeGrid;
     freezeGrid: typeof freezeGrid;
     paintFormat: typeof paintFormat;
+    viewportAreaEditor: typeof viewportAreaEditor;
 };
 export default _default;
