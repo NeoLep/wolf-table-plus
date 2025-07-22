@@ -820,6 +820,23 @@ function fastClearCellFormat(table: Table) {
     }
 }
 
+function indexParser(a: [number, number], d: [number, number]) {
+    if (a[0] >= d[0] && a[1] <= d[1]) {
+        return null
+    } else if ((a[0] <= d[0] && d[0] <= a[1]) || (a[0] <= d[1] && d[1] <= a[1])) {
+        if (a[0] <= d[0] && d[0] <= a[1]) {
+            return [a[0], a[0] + (a[1] - a[0]) - (d[1] - d[0]) - 1]
+        } else {
+            return [d[0], a[1] - d[1] - 1]
+        }
+    } else if (a[0] > d[1]) {
+        const len = d[1] - d[0] + 1
+        return [a[0] - len, a[1] - len]
+    } else {
+        return a
+    }
+}
+
 function insertRowOrCol(table: Table, type: 'row' | 'col') {
     if (table._selector) {
         table.addHistory(`insert ${type}`)
@@ -858,6 +875,23 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
             return res
         })
 
+        table._data.borders = table._data.borders.map((border) => {
+            const [expr, ..._] = border
+            const refs = expr.split(':')
+            let [col, row] = expr2xy(refs[0])
+            let [col2, row2] = expr2xy(refs[1])
+            if (type === 'row') {
+                if (row >= startRow) row++
+                if (row2 >= startRow) row2++
+            } else {
+                if (col >= startCol) col++
+                if (col2 >= startCol) col2++
+            }
+            const nExpr = `${xy2expr(col, row)}:${xy2expr(col2, row2)}`
+            border[0] = nExpr
+            return border
+        })
+
         if (type === 'row') {
             if (startRow <= maxRow) {
                 // 选中
@@ -886,23 +920,6 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
 
         table._cells.resetIndexes()
         table.render()
-    }
-}
-
-function indexParser(a: [number, number], d: [number, number]) {
-    if (a[0] >= d[0] && a[1] <= d[1]) {
-        return null
-    } else if ((a[0] <= d[0] && d[0] <= a[1]) || (a[0] <= d[1] && d[1] <= a[1])) {
-        if (a[0] <= d[0] && d[0] <= a[1]) {
-            return [a[0], a[0] + (a[1] - a[0]) - (d[1] - d[0]) - 1]
-        } else {
-            return [d[0], a[1] - d[1] - 1]
-        }
-    } else if (a[0] > d[1]) {
-        const len = d[1] - d[0] + 1
-        return [a[0] - len, a[1] - len]
-    } else {
-        return a
     }
 }
 
