@@ -1,7 +1,6 @@
 import { borderWidth } from './config'
 import { Range, expr2xy, xy2expr } from './table-renderer'
 import { rangeUnoinMerges, stepColIndex, stepRowIndex } from './data'
-import { isMerged, unmerge } from './data/merge'
 import Selector from './selector'
 import scrollbar from './index.scrollbar'
 import { bindMousemoveAndMouseup } from './event'
@@ -13,16 +12,6 @@ import type { SupportFormats } from './data/format'
 import type { DataCell, DataCellValue } from './data'
 import type { Area, Border, Rect, Style } from './table-renderer'
 import type Table from '.'
-
-function isMergedExpr(t: Table, ref: string) {
-    for (const index in t._data.merges) {
-        const it = t._data.merges[index]
-        const exp1 = it.split(':')[0]
-        if (ref === exp1) {
-            return Number(index)
-        }
-    }
-}
 
 function init(t: Table) {
     t._selector = new Selector(!!t._editable).autofillTrigger(
@@ -68,14 +57,15 @@ function init(t: Table) {
                         t.copy(s._autofillRange, true).render()
                         _selector.autofillRange(null)
                         reset(t)
-                    },
+                    }
                 )
             }
-        },
+        }
     )
 }
 
 function setCellValue(t: Table, value: DataCell) {
+  
     const { _selector } = t
     if (_selector) {
         t.addHistory('set cell value')
@@ -123,7 +113,7 @@ function clearCell(t: Table, ref?: string | Range[], type?: 'value' | 'style') {
     }
     if (ref) {
         if (typeof ref === 'string') {
-            ;[X1, X2] = ref.split(':')
+            [X1, X2] = ref.split(':')
             if (!X2) X2 = X1
             _ranges = [new Range(...expr2xy(X1), ...expr2xy(X2))]
         } else {
@@ -820,23 +810,6 @@ function fastClearCellFormat(table: Table) {
     }
 }
 
-function indexParser(a: [number, number], d: [number, number]) {
-    if (a[0] >= d[0] && a[1] <= d[1]) {
-        return null
-    } else if ((a[0] <= d[0] && d[0] <= a[1]) || (a[0] <= d[1] && d[1] <= a[1])) {
-        if (a[0] <= d[0] && d[0] <= a[1]) {
-            return [a[0], a[0] + (a[1] - a[0]) - (d[1] - d[0]) - 1]
-        } else {
-            return [d[0], a[1] - d[1] - 1]
-        }
-    } else if (a[0] > d[1]) {
-        const len = d[1] - d[0] + 1
-        return [a[0] - len, a[1] - len]
-    } else {
-        return a
-    }
-}
-
 function insertRowOrCol(table: Table, type: 'row' | 'col') {
     if (table._selector) {
         table.addHistory(`insert ${type}`)
@@ -920,6 +893,24 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
 
         table._cells.resetIndexes()
         table.render()
+    }
+}
+
+
+function indexParser(a: [number, number], d: [number, number]) {
+    if (a[0] >= d[0] && a[1] <= d[1]) {
+        return null
+    } else if ((a[0] <= d[0] && d[0] <= a[1]) || (a[0] <= d[1] && d[1] <= a[1])) {
+        if (a[0] <= d[0] && d[0] <= a[1]) {
+            return [a[0], a[0] + (a[1] - a[0]) - (d[1] - d[0]) - 1]
+        } else {
+            return [d[0], a[1] - d[1] - 1]
+        }
+    } else if (a[0] > d[1]) {
+        const len = d[1] - d[0] + 1
+        return [a[0] - len, a[1] - len]
+    } else {
+        return a
     }
 }
 
@@ -1064,8 +1055,10 @@ function clearBorder(table: Table) {
 
 function mergeGrid(table: Table) {
     if (table.isMerged()) {
+        table.addHistory('unmerge')
         table.unmerge()
     } else {
+        table.addHistory('merge')
         table.merge()
     }
     table.render()

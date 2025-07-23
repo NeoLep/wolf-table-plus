@@ -130,7 +130,7 @@ export function toHtml(t: Table, from: string) {
                 }
 
                 cssStyleStr += style2css(styleValue)
-                let innerStyleValue = `${cssStyleStr ? `${cssStyleStr};` : ''} position: relative; padding: 0 5px;`
+                let innerStyleValue = `${cssStyleStr ? `${cssStyleStr};` : ''} position: relative; padding: 0 2pt;`
                 if (!styleValue.textwrap) {
                     innerStyleValue += "word-break: keep-all; white-space: nowrap; overflow: hidden;"
                 }
@@ -340,8 +340,8 @@ export function fromHtml(
 
             elementStylePropValue(tr, 'height', '24px', (v) => {
                 const height = Number.parseInt(v.replaceAll('px', ''))
-                if (height !== 25 && height > (t._data.rows[rowIndex + toStartRow]?.height || 25)) {
-                  if (!t._data.rows[rowIndex + toStartRow]) t._data.rows[rowIndex + toStartRow] = { height: 25 }
+                if (height !== 24 && height > (t._data.rows[rowIndex + toStartRow]?.height || 24)) {
+                  if (!t._data.rows[rowIndex + toStartRow]) t._data.rows[rowIndex + toStartRow] = { height: 24 }
                   t._data.rows[rowIndex + toStartRow].height = height
                 }
             })
@@ -398,6 +398,11 @@ function style2css(s: Partial<Style>) {
     if (s.bold === true) cssStr += `font-weight: bold;`
     if (s.italic === true) cssStr += `font-style: italic;`
     if (s.fontFamily) cssStr += `font-family: ${s.fontFamily};`
-    if (s.fontSize) cssStr += `font-size: ${Math.floor(pt2px(s.fontSize))}px; line-height: ${Math.floor(pt2px(s.fontSize)) + 1}px;`
+    if (s.fontSize) {
+        cssStr += `font-size: ${s.fontSize}pt;`
+        if (s.textwrap) {
+            cssStr += `line-height: ${s.fontSize}pt;`
+        }
+    }
     return cssStr
 }
