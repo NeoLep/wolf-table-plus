@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { xy2expr, Range } from './table-renderer'
-import { pt2px } from './helper'
+import { pt2px, rgbToHex } from './helper'
 import Renders, { CellBase, cellTypeGetter } from './table-renderer/renders'
 import type Table from '.'
 import type {
@@ -40,35 +40,43 @@ export function toHtml(t: Table, from: string) {
     for (const border of t._data.borders) {
         const [ref, borderType, lineStyle, color] = border
         // console.log('border:', border);
+        // console.log(t._data.borders)
         const it = Range.with(ref)
         if (it.intersects(fromRange)) {
             const { startRow, startCol, endRow, endCol } = it
             it.each((r, c) => {
+                const v = t.cellValue(r, c)
                 const borderValue = border2css(lineStyle, color)
                 const borderNames = []
-                if (borderType === 'all') {
-                    borderNames.push('border')
-                }
-                if ((borderType === 'outside' || borderType === 'left') && c === startCol)
+                if (borderType === 'all') { borderNames.push('border') }
+                if ((borderType === 'outside' || borderType === 'left') && c === startCol) { 
                     borderNames.push('border-left')
-                if ((borderType === 'outside' || borderType === 'right') && c === endCol)
+                }
+                if ((borderType === 'outside' || borderType === 'right') && c === endCol) {
                     borderNames.push('border-right')
-                if ((borderType === 'outside' || borderType === 'top') && r === startRow)
+                }
+                if ((borderType === 'outside' || borderType === 'top') && r === startRow) {
                     borderNames.push('border-top')
-                if ((borderType === 'outside' || borderType === 'bottom') && r === endRow)
+                }
+                if ((borderType === 'outside' || borderType === 'bottom') && r === endRow) {
                     borderNames.push('border-bottom')
+                }
                 if (
                     (borderType === 'inside' || borderType === 'vertical') &&
                     c >= startCol &&
                     c < endCol
-                )
+                ) {
                     borderNames.push('border-right')
+                }
                 if (
                     (borderType === 'inside' || borderType === 'horizontal') &&
                     r >= startRow &&
                     r < endRow
-                )
+                ) {
                     borderNames.push('border-bottom')
+                }
+                    
+                // console.log(r, c, v, borderType, borderNames)
                 if (borderNames.length > 0) {
                     cellIndexes.set(
                         `${r}_${c}`,
@@ -206,8 +214,8 @@ export function fromHtml(
 
                 // style
                 const nstyle: Partial<Style> = {}
-                elementStylePropValue(td, 'background-color', '', (v) => (nstyle.bgcolor = v))
-                elementStylePropValue(td, 'color', dstyle.color, (v) => (nstyle.color = v))
+                elementStylePropValue(td, 'background-color', '', (v) => (nstyle.bgcolor = rgbToHex(v)))
+                elementStylePropValue(td, 'color', dstyle.color, (v) => (nstyle.color = rgbToHex(v)))
                 elementStylePropValue(td, 'text-align', dstyle.align, (v) => (nstyle.align = v as Align))
                 elementStylePropValue(td,'vertical-align',dstyle.valign,(v) => (nstyle.valign = v as VerticalAlign))
                 elementStyleBooleanValue(td,'white-space','normal',(_v) => (nstyle.textwrap = true))
@@ -244,7 +252,7 @@ export function fromHtml(
                 // let border: Border | undefined = undefined;
                 elementStylePropValue(td, 'border-width', '', (it) => borderxs.push(it))
                 elementStylePropValue(td, 'border-style', '', (it) => borderxs.push(it))
-                elementStylePropValue(td, 'border-color', '', (it) => borderxs.push(it))
+                elementStylePropValue(td, 'border-color', '', (it) => borderxs.push(rgbToHex(it)))
                 // console.log(ref, td, borderxs)
                 // console.log([r, c], ref, [rowspan, colspan], td)
 

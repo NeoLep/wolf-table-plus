@@ -39,7 +39,7 @@ export default class FontSizeButton extends BaseButtons {
         if (!this.table._selector?._focusRange) return
         const { startRow, startCol } = this.table._selector._focusRange
         const style = this.table.getStyle(startRow, startCol)
-        this._dropdown.value = (style.fontSize as number) || 10
+        this._dropdown.value = (style?.fontSize as number) || 10
         this.render()
     }
 

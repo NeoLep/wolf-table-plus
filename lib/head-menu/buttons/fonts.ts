@@ -41,7 +41,7 @@ export default class FontButton extends BaseButtons {
         const { startRow, startCol } = this.table._selector._focusRange
         // const cell = this.table.cell(startRow, startCol)
         const style = this.table.getStyle(startRow, startCol)
-        this._dropdown.value = (style.fontFamily as SupportFonts) || 'Arial'
+        this._dropdown.value = (style?.fontFamily as SupportFonts) || 'Arial'
         this.render()
     }
 

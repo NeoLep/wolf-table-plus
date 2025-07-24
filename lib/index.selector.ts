@@ -662,6 +662,13 @@ async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boole
             return
         }
     } else {
+        // 剪切模式记得清空复制区域与剪切板内容
+        if (isCutted) {
+            if (table._selector?._copyRange) {
+                clearCell(table, [table._selector?._copyRange]) // 删除内容
+            }
+        }
+
         const pValue = localStorage.getItem('wtClipboard')
         if (!pValue) {
             return
@@ -674,13 +681,7 @@ async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boole
         }
     }
 
-    // 剪切模式记得清空复制区域与剪切板内容
-    if (isCutted) {
-        if (table._selector?._copyRange) {
-            clearCell(table, [table._selector?._copyRange]) // 删除内容
-        }
-        clearCopy(table) // 清除复制
-    }
+    clearCopy(table) // 清除复制
     table.addHistory('paste value')
 }
 
