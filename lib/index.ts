@@ -442,19 +442,21 @@ export default class Table {
         if (!rewrite && index !== -1) {
             style = Object.assign({}, this.style(index, false) || {}, style)
         }
+
+        const cell = this.cell(row, col)
         if (index !== -1) {
-            this.updateStyle(index, style)
+            index = this.updateStyle(index, style)
         } else {
             index = this.addStyle(style)
-            const cell = this.cell(row, col)
-            if (cell instanceof Object) {
-                cell.style = index
-            } else {
-                this.cell(row, col, {
-                    value: cell || '',
-                    style: index,
-                } as CellText)
-            }
+        }
+
+        if (cell instanceof Object) {
+            cell.style = index
+        } else {
+            this.cell(row, col, {
+                value: cell || '',
+                style: index,
+            } as CellText)
         }
 
         return this

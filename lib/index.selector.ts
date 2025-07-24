@@ -57,15 +57,14 @@ function init(t: Table) {
                         t.copy(s._autofillRange, true).render()
                         _selector.autofillRange(null)
                         reset(t)
-                    }
+                    },
                 )
             }
-        }
+        },
     )
 }
 
 function setCellValue(t: Table, value: DataCell) {
-  
     const { _selector } = t
     if (_selector) {
         t.addHistory('set cell value')
@@ -113,7 +112,7 @@ function clearCell(t: Table, ref?: string | Range[], type?: 'value' | 'style') {
     }
     if (ref) {
         if (typeof ref === 'string') {
-            [X1, X2] = ref.split(':')
+            ;[X1, X2] = ref.split(':')
             if (!X2) X2 = X1
             _ranges = [new Range(...expr2xy(X1), ...expr2xy(X2))]
         } else {
@@ -895,7 +894,6 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
         table.render()
     }
 }
-
 
 function indexParser(a: [number, number], d: [number, number]) {
     if (a[0] >= d[0] && a[1] <= d[1]) {
