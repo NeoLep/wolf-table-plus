@@ -644,41 +644,33 @@ function copyValue(table: Table) {
 
 async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean) {
     if (navigator.clipboard && window.isSecureContext) {
-        // 剪切模式记得清空复制区域与剪切板内容
-        if (isCutted) {
-            if (table._selector?._copyRange) {
-                clearCell(table, [table._selector?._copyRange]) // 删除内容
-            }
-        }
         const clipboardItems = await navigator.clipboard.read()
-        if (clipboardItems.length > 0) {
-            table.addHistory('paste value')
-            const item = clipboardItems[0]
-            if (!onlyCopyText) {
-                onlyCopyText = !getClipboardText(item, 'text/html', (text) => {
-                    table.fill(text).render()
-                })
-            }
-            if (onlyCopyText) {
-                getClipboardText(item, 'text/plain', (text) => {
-                    table.fill(toArraysFromClipboardText(text)).render()
-                })
-            }
-        } else {
-            return
-        }
-    } else {
-        // 剪切模式记得清空复制区域与剪切板内容
-        if (isCutted) {
-            if (table._selector?._copyRange) {
-                clearCell(table, [table._selector?._copyRange]) // 删除内容
-            }
+        if (clipboardItems.length === 0) return
+
+        table.addHistory('paste value')
+
+        if (isCutted && table._selector?._copyRange) clearCell(table, [table._selector?._copyRange]) // 删除内容
+
+        const item = clipboardItems[0]
+        if (!onlyCopyText) {
+            onlyCopyText = !getClipboardText(item, 'text/html', (text) => {
+                table.fill(text).render()
+            })
         }
 
-        const pValue = localStorage.getItem('wtClipboard')
-        if (!pValue) {
-            return
+        if (onlyCopyText) {
+            getClipboardText(item, 'text/plain', (text) => {
+                table.fill(toArraysFromClipboardText(text)).render()
+            })
         }
+    } else {
+        const pValue = localStorage.getItem('wtClipboard')
+        if (!pValue) return
+
+        table.addHistory('paste value')
+
+        if (isCutted && table._selector?._copyRange) clearCell(table, [table._selector?._copyRange])
+
         const { plain, html } = JSON.parse(pValue)
         if (onlyCopyText) {
             table.fill(toArraysFromClipboardText(plain)).render()
@@ -687,8 +679,9 @@ async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boole
         }
     }
 
-    clearCopy(table) // 清除复制
-    table.addHistory('paste value')
+    if (isCutted) {
+        clearCopy(table) // 清除复制
+    }
 }
 
 function fastSetCellFormat(table: Table, format?: SupportFormats) {
@@ -939,7 +932,7 @@ function deleteRowOrCol(table: Table, type: 'row' | 'col') {
         const exprTransfer = (expr: string) => {
             const refs = expr.split(':')
             const [col, row] = expr2xy(refs[0])
-            const [col2, row2] = expr2xy(refs[1])
+            const [col2, row2] = expr2xy(refs[1] || refs[0])
             if (type === 'row') {
                 const res = indexParser([row, row2], [startRow, endRow])
                 if (res) {
