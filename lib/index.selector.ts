@@ -644,6 +644,12 @@ function copyValue(table: Table) {
 
 async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boolean) {
     if (navigator.clipboard && window.isSecureContext) {
+        // 剪切模式记得清空复制区域与剪切板内容
+        if (isCutted) {
+            if (table._selector?._copyRange) {
+                clearCell(table, [table._selector?._copyRange]) // 删除内容
+            }
+        }
         const clipboardItems = await navigator.clipboard.read()
         if (clipboardItems.length > 0) {
             table.addHistory('paste value')
