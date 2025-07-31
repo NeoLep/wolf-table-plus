@@ -57,14 +57,15 @@ function init(t: Table) {
                         t.copy(s._autofillRange, true).render()
                         _selector.autofillRange(null)
                         reset(t)
-                    },
+                    }
                 )
             }
-        },
+        }
     )
 }
 
 function setCellValue(t: Table, value: DataCell) {
+  
     const { _selector } = t
     if (_selector) {
         t.addHistory('set cell value')
@@ -112,7 +113,7 @@ function clearCell(t: Table, ref?: string | Range[], type?: 'value' | 'style') {
     }
     if (ref) {
         if (typeof ref === 'string') {
-            ;[X1, X2] = ref.split(':')
+            [X1, X2] = ref.split(':')
             if (!X2) X2 = X1
             _ranges = [new Range(...expr2xy(X1), ...expr2xy(X2))]
         } else {
@@ -648,9 +649,9 @@ async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boole
         if (clipboardItems.length === 0) return
 
         table.addHistory('paste value')
-
+        
         if (isCutted && table._selector?._copyRange) clearCell(table, [table._selector?._copyRange]) // 删除内容
-
+        
         const item = clipboardItems[0]
         if (!onlyCopyText) {
             onlyCopyText = !getClipboardText(item, 'text/html', (text) => {
@@ -668,7 +669,7 @@ async function pasteValue(table: Table, onlyCopyText?: boolean, isCutted?: boole
         if (!pValue) return
 
         table.addHistory('paste value')
-
+        
         if (isCutted && table._selector?._copyRange) clearCell(table, [table._selector?._copyRange])
 
         const { plain, html } = JSON.parse(pValue)
@@ -835,7 +836,7 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
         table._data.merges = table._data.merges.map((item) => {
             const refs = item.split(':')
             let [col, row] = expr2xy(refs[0])
-            let [col2, row2] = expr2xy(refs[1])
+            let [col2, row2] = expr2xy(refs[1] || refs[0])
             if (type === 'row') {
                 if (row >= startRow) row++
                 if (row2 >= startRow) row2++
@@ -851,7 +852,7 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
             const [expr, ..._] = border
             const refs = expr.split(':')
             let [col, row] = expr2xy(refs[0])
-            let [col2, row2] = expr2xy(refs[1])
+            let [col2, row2] = expr2xy(refs[1] || refs[0])
             if (type === 'row') {
                 if (row >= startRow) row++
                 if (row2 >= startRow) row2++
@@ -894,6 +895,7 @@ function insertRowOrCol(table: Table, type: 'row' | 'col') {
         table.render()
     }
 }
+
 
 function indexParser(a: [number, number], d: [number, number]) {
     if (a[0] >= d[0] && a[1] <= d[1]) {
